@@ -4,7 +4,11 @@
 - [ ] Get batteries, battery charger (pascal says yes, i’ll get them aug. 28 at 2036\)  
 - [ ] Switch blue pdb to pdp from 2036  
 - [ ] Wire motors to motor controllers  
-- [ ] Mount motor controllers (probably victors)  
+- [ ] Mount motor controllers (2 spark maxes, 2 victors)
+- [ ] victor wired to pwm 0, left motor 1
+- [ ] spark wired to pwm 1, left motor 2
+- [ ] spark wired to pwm 2, right motor 1
+- [ ] victor wired to pwm 3, right motor 2
 - [ ] Make bumper mounts/make bumpers if needed  
 - [ ] Mount roboRio  
 - [ ] Wire roboRio to motor controllers, pdp can, and power  
