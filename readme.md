@@ -2,7 +2,10 @@
 - [x] ~~Assemble chassis~~  
 - [x] ~~Install motors, build gearboxes~~  
 - [ ] Get batteries, battery charger (pascal says yes, i’ll get them aug. 28 at 2036\)  
-- [ ] Switch blue pdb to pdp from 2036  
+- [ ] Switch blue pdb to pdp from 2036
+- [ ] Mount pdp
+- [ ] Wire sb50+120a breaker to pdp
+- [ ] wire pdp to motor controllers
 - [ ] Wire motors to motor controllers  
 - [ ] Mount motor controllers (2 spark maxes, 2 victors)
 - [ ] victor wired to pwm 0, left motor 1
