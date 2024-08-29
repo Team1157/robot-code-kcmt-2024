@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
+import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
 
 public class Robot extends TimedRobot {
   private DifferentialDrive m_robotDrive;
@@ -17,8 +18,8 @@ public class Robot extends TimedRobot {
   private Joystick m_rightStick;
 
   // all the motors
-  private final PWMSparkMax m_leftMotor1 = new PWMSparkMax(0);
-  private final PWMSparkMax m_leftMotor2 = new PWMSparkMax(1);
+  private final PWMVictorSPX m_leftMotor1 = new PWMVictorSPX(0);
+  private final PWMVictorSPX m_leftMotor2 = new PWMVictorSPX(1);
   private final PWMSparkMax m_rightMotor1 = new PWMSparkMax(2);
   private final PWMSparkMax m_rightMotor2 = new PWMSparkMax(3);
 
