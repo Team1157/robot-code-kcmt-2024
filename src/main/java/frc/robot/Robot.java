@@ -39,12 +39,14 @@ public class Robot extends TimedRobot {
 
     // Setup DifferentialDrive
     m_robotDrive = new DifferentialDrive(leftMotors, rightMotors);
-    m_leftStick = new Joystick(0);
-    m_rightStick = new Joystick(1);
+    m_leftStick = new Joystick(0);  // Left stick for forward/backward
+    m_rightStick = new Joystick(1); // Right stick for left/right turning like a drone controller thingy idk its more intuitive for me
   }
 
   @Override
   public void teleopPeriodic() {
-    m_robotDrive.tankDrive(-m_leftStick.getY(), -m_rightStick.getY());
+    double forwardBackward = -m_leftStick.getY(); // Forward/backward with left stick Y-axis
+    double leftRight = m_rightStick.getX();       // Left/right turning with right stick X-axis
+    m_robotDrive.arcadeDrive(forwardBackward, leftRight);
   }
 }
