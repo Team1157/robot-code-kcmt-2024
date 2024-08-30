@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.SPI;
 
 public class Robot extends TimedRobot {
     private Drivetrain m_drivetrain;
@@ -14,12 +13,9 @@ public class Robot extends TimedRobot {
     private BuiltInAccelerometer m_accelerometer;
     private NetworkTableInstance m_ntInstance;
     private NetworkTable m_dashboardTable;
-    private NetworkTableEntry m_gyroEntry;
     private NetworkTableEntry m_accelXEntry;
     private NetworkTableEntry m_accelYEntry;
     private NetworkTableEntry m_accelZEntry;
-    private NetworkTableEntry m_targetSpeedEntry;
-
     @Override
     public void robotInit() {
         m_drivetrain = new Drivetrain();
@@ -34,7 +30,7 @@ public class Robot extends TimedRobot {
         m_accelXEntry = m_dashboardTable.getEntry("AccelX");
         m_accelYEntry = m_dashboardTable.getEntry("AccelY");
         m_accelZEntry = m_dashboardTable.getEntry("AccelZ");
-        m_targetSpeedEntry = m_dashboardTable.getEntry("TargetSpeed");
+        m_dashboardTable.getEntry("TargetSpeed");
     }
 
     @Override
