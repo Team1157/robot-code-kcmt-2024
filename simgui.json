@@ -1,5 +1,12 @@
 {
   "HALProvider": {
+    "Other Devices": {
+      "BuiltInAccel": {
+        "header": {
+          "open": true
+        }
+      }
+    },
     "PWM Outputs": {
       "window": {
         "visible": true

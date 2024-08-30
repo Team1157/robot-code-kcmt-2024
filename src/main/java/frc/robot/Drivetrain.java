@@ -20,7 +20,7 @@ public class Drivetrain {
         MotorControllerGroup leftMotors = new MotorControllerGroup(m_leftMotor1, m_leftMotor2);
         MotorControllerGroup rightMotors = new MotorControllerGroup(m_rightMotor1, m_rightMotor2);
 
-        // Invert the right side motors (depends on wiring)
+        // Invert the right side motors (depends on wiring, UNTESTED MIGHT HAVE TO FLIP WHICH ONE AND IF AT ALL)
         rightMotors.setInverted(true);
 
         // Setup DifferentialDrive
