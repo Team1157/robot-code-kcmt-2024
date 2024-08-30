@@ -37,7 +37,8 @@ public class Drivetrain {
         return m_robotDrive;
     }
 
-    public void arcadeDrive(double forwardBackward, double leftRight) {
+    public double arcadeDrive(double forwardBackward, double leftRight) {
         m_robotDrive.arcadeDrive(forwardBackward, leftRight);
+        return leftRight;
     }
 }
