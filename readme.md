@@ -23,6 +23,6 @@
 - [x] ~~Flash roboRio with 2024 firmware, ip 10.11.57.2~~  
 - [x] ~~Setup an om5p-ac radio for testing~~
 - [x] ~~Setup NI driverstation on a laptop/team computer~~  
-- [x] ~~Write robot code (untested\!)~~  
+- [x] ~~Write robot code (tested!)~~  
 - [ ] Make chassis rigid  
 - [ ] Mechanism\!?\! Ie a shooter and intake or just a big blocker like the kiddie pool team
