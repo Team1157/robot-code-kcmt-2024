@@ -1,7 +1,9 @@
+# todo
+
 - [ ] Get registered for kcmt (in progress)  
 - [x] ~~Assemble chassis~~  
 - [x] ~~Install motors, build gearboxes~~  
-- [x] ~~Get batteries, battery charger (pascal says yes, i’ll get them aug. 28 at 2036)~~ 
+- [x] ~~Get batteries, battery charger (pascal says yes, i’ll get them aug. 28 at 2036)~~
 - [x] ~~Switch blue pdb to pdp from 2036~~
 - [x] ~~Mount pdp~~
 - [x] ~~Wire sb50+120a breaker to pdp~~
