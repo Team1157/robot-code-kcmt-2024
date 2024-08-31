@@ -26,3 +26,4 @@
 - [x] ~~Write robot code (tested!)~~  
 - [ ] Make chassis rigid  
 - [ ] Mechanism\!?\! Ie a shooter and intake or just a big blocker like the kiddie pool team
+- [ ] Autos
