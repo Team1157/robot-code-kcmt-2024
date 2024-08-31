@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
@@ -22,6 +23,7 @@ public class Robot extends TimedRobot {
     private static final String kCustomAuto = "auto1";
     private String m_autoSelected;
     private final SendableChooser<String> m_chooser = new SendableChooser<>();
+    private final Timer m_timer = new Timer();
     
     @Override
     public void robotInit() {
@@ -42,25 +44,33 @@ public class Robot extends TimedRobot {
         m_accelZEntry = m_dashboardTable.getEntry("AccelZ");
         m_dashboardTable.getEntry("TargetSpeed");
     }
+    
     @Override
     public void autonomousInit() {
-      m_autoSelected = m_chooser.getSelected();
-      System.out.println("Auto selected: " + m_autoSelected);
+        m_autoSelected = m_chooser.getSelected();
+        System.out.println("Auto selected: " + m_autoSelected);
+        m_timer.reset();
+        m_timer.start();
     }
   
-    /** This function is called periodically during autonomous. */
     @Override
     public void autonomousPeriodic() {
-      switch (m_autoSelected) {
-        case kCustomAuto:
+        switch (m_autoSelected) {
+            case kCustomAuto:
           // auto1 code idk something like a drive to centerline and disrupt other bots, we win at chicken
           break;
-        case kDefaultAuto:
-        default:
-          // auto0 code, like auto1 just at a different starting position
-          break;
-      }
+            case kDefaultAuto:
+            default:
+                // Drive forward for 4 seconds, just for testing 
+                if (m_timer.get() < 4.0) {
+                    m_drivetrain.arcadeDrive(1.0, 0.0); // Move forward with 50% speed
+                } else {
+                    m_drivetrain.arcadeDrive(1.0, 0.0); // Stop after 4 seconds
+                }
+                break;
+        }
     }
+    
     @Override
     public void teleopPeriodic() {
         double forwardBackward = -m_joystick.getRawAxis(1); // Forward/backward with left stick Y-axis (index 1)
