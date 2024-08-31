@@ -20,14 +20,12 @@
   },
   "NTProvider": {
     "types": {
-      "/FMSInfo": "FMSInfo"
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Auto choices": "String Chooser"
     }
   },
   "NetworkTables Info": {
     "Clients": {
-      "open": true
-    },
-    "Connections": {
       "open": true
     },
     "Server": {

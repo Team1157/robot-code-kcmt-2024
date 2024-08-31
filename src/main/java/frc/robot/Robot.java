@@ -2,6 +2,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -16,8 +18,16 @@ public class Robot extends TimedRobot {
     private NetworkTableEntry m_accelXEntry;
     private NetworkTableEntry m_accelYEntry;
     private NetworkTableEntry m_accelZEntry;
+    private static final String kDefaultAuto = "auto0";
+    private static final String kCustomAuto = "auto1";
+    private String m_autoSelected;
+    private final SendableChooser<String> m_chooser = new SendableChooser<>();
+    
     @Override
     public void robotInit() {
+        m_chooser.setDefaultOption("auto0", kDefaultAuto);
+        m_chooser.addOption("auto1", kCustomAuto);
+        SmartDashboard.putData("Auto choices", m_chooser);
         m_drivetrain = new Drivetrain();
         m_joystick = new Joystick(0);  // Use joystick on port 0
         m_accelerometer = new BuiltInAccelerometer();
@@ -32,7 +42,25 @@ public class Robot extends TimedRobot {
         m_accelZEntry = m_dashboardTable.getEntry("AccelZ");
         m_dashboardTable.getEntry("TargetSpeed");
     }
-
+    @Override
+    public void autonomousInit() {
+      m_autoSelected = m_chooser.getSelected();
+      System.out.println("Auto selected: " + m_autoSelected);
+    }
+  
+    /** This function is called periodically during autonomous. */
+    @Override
+    public void autonomousPeriodic() {
+      switch (m_autoSelected) {
+        case kCustomAuto:
+          // auto1 code idk something like a drive to centerline and disrupt other bots, we win at chicken
+          break;
+        case kDefaultAuto:
+        default:
+          // auto0 code, like auto1 just at a different starting position
+          break;
+      }
+    }
     @Override
     public void teleopPeriodic() {
         double forwardBackward = -m_joystick.getRawAxis(1); // Forward/backward with left stick Y-axis (index 1)
