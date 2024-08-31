@@ -63,9 +63,9 @@ public class Robot extends TimedRobot {
             default:
                 // Drive forward for 4 seconds, just for testing 
                 if (m_timer.get() < 4.0) {
-                    m_drivetrain.arcadeDrive(1.0, 0.0); // Move forward with 50% speed
+                    m_drivetrain.arcadeDrive(1.0, 0.0); // Move forward with 100% speed
                 } else {
-                    m_drivetrain.arcadeDrive(1.0, 0.0); // Stop after 4 seconds
+                    m_drivetrain.arcadeDrive(0.0, 0.0); // Stop after 4 seconds
                 }
                 break;
         }
