@@ -1,6 +1,6 @@
 # todo
 
-- [ ] Get registered for kcmt (in progress)  
+- [X] ~~Get registered for kcmt (yay!!!)~~  
 - [x] ~~Assemble chassis~~  
 - [x] ~~Install motors, build gearboxes~~  
 - [x] ~~Get batteries, battery charger (pascal says yes, i’ll get them aug. 28 at 2036)~~
@@ -14,10 +14,10 @@
 - [ ] spark wired to pwm 1, left motor 2
 - [ ] spark wired to pwm 2, right motor 1
 - [ ] victor wired to pwm 3, right motor 2
-- [ ] Make bumper mounts/make bumpers if needed  
+- [ ] Make bumper mounts/make bumpers if existing ones don't fit  
 - [x] ~~Mount roboRio~~  
 - [ ] Wire roboRio to motor controllers, pdp can, and power  
-- [ ] Borrow/buy vh-109 [radio](https://wcproducts.com/products/frc-radio) for kcmt, not needed for testing  
+- [X] ~~Borrow/buy vh-109 [radio](https://wcproducts.com/products/frc-radio) for kcmt, Debbie English said one can be provided)~~
 - [x] ~~Setup an om5p-ac radio for testing with frc firmware, ip 10.11.57.1~~  
 - [ ] Mount+wire radio to power and rio  
 - [ ] Mount RSL(s)  
@@ -28,4 +28,4 @@
 - [x] ~~Write robot code (tested!)~~  
 - [ ] Make chassis rigid  
 - [ ] Mechanism\!?\! Ie a shooter and intake or just a big blocker like the kiddie pool team
-- [ ] Autos
+- [X] ~~Autos (sorta just a basic forwards drive spoiler)~~
