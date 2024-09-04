@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+
 
 public class Robot extends TimedRobot {
     private Drivetrain m_drivetrain;
@@ -24,7 +26,10 @@ public class Robot extends TimedRobot {
     private String m_autoSelected;
     private final SendableChooser<String> m_chooser = new SendableChooser<>();
     private final Timer m_timer = new Timer();
-    
+
+    // Field2d object for field visualization
+    private Field2d m_field;
+
     @Override
     public void robotInit() {
         m_chooser.setDefaultOption("auto0", kDefaultAuto);
@@ -43,6 +48,10 @@ public class Robot extends TimedRobot {
         m_accelYEntry = m_dashboardTable.getEntry("AccelY");
         m_accelZEntry = m_dashboardTable.getEntry("AccelZ");
         m_dashboardTable.getEntry("TargetSpeed");
+
+        // Initialize the Field2d object
+        m_field = new Field2d();
+        SmartDashboard.putData("Field", m_field);
     }
     
     @Override
@@ -57,8 +66,8 @@ public class Robot extends TimedRobot {
     public void autonomousPeriodic() {
         switch (m_autoSelected) {
             case kCustomAuto:
-          // auto1 code idk something like a drive to centerline and disrupt other bots, we win at chicken
-          break;
+                // auto1 code idk something like a drive to centerline and disrupt other bots, we win at chicken
+                break;
             case kDefaultAuto:
             default:
                 // Drive forward for 4 seconds, just for testing 
@@ -69,6 +78,9 @@ public class Robot extends TimedRobot {
                 }
                 break;
         }
+
+        // Update the Field2d position in autonomous so we know where its going idk some of the driverstations have a bad view from behind the line
+        updateField2d();
     }
     
     @Override
@@ -79,5 +91,13 @@ public class Robot extends TimedRobot {
         m_accelXEntry.setDouble(m_accelerometer.getX());        // X-axis acceleration
         m_accelYEntry.setDouble(m_accelerometer.getY());        // Y-axis acceleration
         m_accelZEntry.setDouble(m_accelerometer.getZ());        // Z-axis acceleration
+
+        // Update the Field2d position in teleop
+        updateField2d();
+    }
+
+    private void updateField2d() {
+        // Get the current pose from the drivetrain and update the Field2d object
+        m_field.setRobotPose(m_field.getRobotPose());
     }
 }
