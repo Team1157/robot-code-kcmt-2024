@@ -7,9 +7,9 @@
 - [x] ~~Switch blue pdb to pdp from 2036~~
 - [x] ~~Mount pdp~~
 - [x] ~~Wire sb50+120a breaker to pdp~~
-- [ ] wire pdp to motor controllers
-- [ ] Wire motors to motor controllers  
-- [ ] Mount motor controllers (2 spark maxes, 2 victors)
+- [X] wire pdp to motor controllers
+- [X] Wire motors to motor controllers  
+- [X] Mount motor controllers (2 spark maxes, 2 victors)
 - [ ] victor wired to pwm 0, left motor 1
 - [ ] spark wired to pwm 1, left motor 2
 - [ ] spark wired to pwm 2, right motor 1
