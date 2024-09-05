@@ -16,7 +16,7 @@
 - [X] ~~victor wired to pwm 3, right motor 2~~
 - [ ] Make bumper mounts/make bumpers if existing ones don't fit  
 - [x] ~~Mount roboRio~~  
-- [ ] Wire roboRio to motor controllers, pdp can, and power  
+- [X] ~~Wire roboRio to motor controllers, pdp can, and power~~  
 - [X] ~~Borrow/buy vh-109 [radio](https://wcproducts.com/products/frc-radio) for kcmt, Debbie English said one can be provided)~~
 - [x] ~~Setup an om5p-ac radio for testing with frc firmware, ip 10.11.57.1~~  
 - [X] ~~Mount+wire radio to power and rio~~  
