@@ -1,5 +1,6 @@
 # todo
-
+- [X] ~~get talon srx's from 2036~~
+- [ ] Replace current lopsided and mismatched motor controllers with the talon srx's
 - [X] ~~Get registered for kcmt (yay!!!)~~  
 - [x] ~~Assemble chassis~~  
 - [x] ~~Install motors, build gearboxes~~  
