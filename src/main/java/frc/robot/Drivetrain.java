@@ -11,8 +11,8 @@ public class Drivetrain {
 
     // Motors
     private final PWMVictorSPX m_leftMotor1 = new PWMVictorSPX(0);
-    private final PWMSparkMax m_leftMotor2 = new PWMSparkMax(1);
-    private final PWMSparkMax m_rightMotor1 = new PWMSparkMax(2);
+    private final PWMVictorSPX m_leftMotor2 = new PWMVictorSPX(1);
+    private final PWMVictorSPX m_rightMotor1 = new PWMVictorSPX(2);
     private final PWMVictorSPX m_rightMotor2 = new PWMVictorSPX(3);
 
     public Drivetrain() {
