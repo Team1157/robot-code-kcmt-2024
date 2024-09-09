@@ -3,17 +3,16 @@ package frc.robot;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
-import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
+import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 
 public class Drivetrain {
     private DifferentialDrive m_robotDrive;
 
     // Motors
-    private final PWMVictorSPX m_leftMotor1 = new PWMVictorSPX(0);
-    private final PWMVictorSPX m_leftMotor2 = new PWMVictorSPX(1);
-    private final PWMVictorSPX m_rightMotor1 = new PWMVictorSPX(2);
-    private final PWMVictorSPX m_rightMotor2 = new PWMVictorSPX(3);
+    private final PWMTalonSRX m_leftMotor1 = new PWMTalonSRX(0);
+    private final PWMTalonSRX m_leftMotor2 = new PWMTalonSRX(1);
+    private final PWMTalonSRX m_rightMotor1 = new PWMTalonSRX(2);
+    private final PWMTalonSRX m_rightMotor2 = new PWMTalonSRX(3);
 
     public Drivetrain() {
         // Group the motors
