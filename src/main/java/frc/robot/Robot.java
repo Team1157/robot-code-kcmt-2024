@@ -15,35 +15,37 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
-  private final PWMTalonSRX m_leftMotor = new PWMTalonSRX(0);
-  private final PWMTalonSRX m_rightMotor = new PWMTalonSRX(2);
-  private final PWMTalonSRX m_leftFollower = new PWMTalonSRX(1);
-  private final PWMTalonSRX m_rightFollower = new PWMTalonSRX(3);
-  private final DifferentialDrive m_robotDrive =
-  new DifferentialDrive(m_leftMotor::set, m_rightMotor::set);
+  private static final int LEFT_MOTOR_PORT = 0;
+  private static final int LEFT_FOLLOWER_PORT = 1;
+  private static final int RIGHT_MOTOR_PORT = 2;
+  private static final int RIGHT_FOLLOWER_PORT = 3;
+
+  private final PWMTalonSRX m_leftMotor = new PWMTalonSRX(LEFT_MOTOR_PORT);
+  private final PWMTalonSRX m_rightMotor = new PWMTalonSRX(RIGHT_MOTOR_PORT);
+  private final PWMTalonSRX m_leftFollower = new PWMTalonSRX(LEFT_FOLLOWER_PORT);
+  private final PWMTalonSRX m_rightFollower = new PWMTalonSRX(RIGHT_FOLLOWER_PORT);
+
+  private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
   private final XboxController m_driverController = new XboxController(0);
+
   private BuiltInAccelerometer m_accelerometer;
   private NetworkTableInstance m_ntInstance;
   private NetworkTable m_dashboardTable;
-  private NetworkTableEntry m_accelXEntry;
-  private NetworkTableEntry m_accelYEntry;
-  private NetworkTableEntry m_accelZEntry;
-  private NetworkTableEntry m_leftMotorOutputEntry;
-  private NetworkTableEntry m_rightMotorOutputEntry;
-  private NetworkTableEntry m_leftFollowerOutputEntry;
-  private NetworkTableEntry m_rightFollowerOutputEntry;
-  private NetworkTableEntry m_timerEntry;
-  private NetworkTableEntry m_fieldPositionEntry;
+  private NetworkTableEntry m_accelXEntry, m_accelYEntry, m_accelZEntry;
+  private NetworkTableEntry m_leftMotorOutputEntry, m_rightMotorOutputEntry;
+  private NetworkTableEntry m_leftFollowerOutputEntry, m_rightFollowerOutputEntry;
+  private NetworkTableEntry m_timerEntry, m_fieldPositionEntry;
+
   private static final String kDefaultAuto = "auto0";
   private static final String kCustomAuto1 = "auto1";
   private static final String kCustomAuto2 = "auto2";
   private static final String kCustomAuto3 = "auto3";
+
   private String m_autoSelected;
-  private final SendableChooser < String > m_chooser = new SendableChooser < > ();
+  private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private final Timer m_timer = new Timer();
 
-  // Field2d object for field visualization also not at all implemented given we're a vision-les tank drive
-  private Field2d m_field;
+  private final Field2d m_field = new Field2d();
 
   public Robot() {
     SendableRegistry.addChild(m_robotDrive, m_leftMotor);
@@ -52,22 +54,31 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    m_chooser.setDefaultOption("auto0", kDefaultAuto);
-    m_chooser.addOption("auto1", kCustomAuto1);
-    m_chooser.addOption("auto2", kCustomAuto2);
-    m_chooser.addOption("auto3", kCustomAuto3);
-    SmartDashboard.putData("Auto choices", m_chooser);
+    configureAutoChooser();
+    configureMotors();
+    initializeNetworkTables();
+    SmartDashboard.putData("Field", m_field);
+  }
 
+  private void configureAutoChooser() {
+    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
+    m_chooser.addOption("Custom Auto 1", kCustomAuto1);
+    m_chooser.addOption("Custom Auto 2", kCustomAuto2);
+    m_chooser.addOption("Custom Auto 3", kCustomAuto3);
+    SmartDashboard.putData("Auto choices", m_chooser);
+  }
+
+  private void configureMotors() {
     m_leftMotor.addFollower(m_leftFollower);
     m_rightMotor.addFollower(m_rightFollower);
     m_rightMotor.setInverted(true);
     m_accelerometer = new BuiltInAccelerometer();
+  }
 
-    // Initialize NetworkTables
+  private void initializeNetworkTables() {
     m_ntInstance = NetworkTableInstance.getDefault();
     m_dashboardTable = m_ntInstance.getTable("SmartDashboard");
 
-    // Create NetworkTable entries for various sensors and data
     m_accelXEntry = m_dashboardTable.getEntry("AccelX");
     m_accelYEntry = m_dashboardTable.getEntry("AccelY");
     m_accelZEntry = m_dashboardTable.getEntry("AccelZ");
@@ -77,28 +88,23 @@ public class Robot extends TimedRobot {
     m_rightFollowerOutputEntry = m_dashboardTable.getEntry("RightFollowerOutput");
     m_timerEntry = m_dashboardTable.getEntry("MatchTime");
     m_fieldPositionEntry = m_dashboardTable.getEntry("FieldPosition");
-
-    // Initialize the Field2d object
-    m_field = new Field2d();
-    SmartDashboard.putData("Field", m_field);
   }
 
   @Override
   public void robotPeriodic() {
-    // Update NetworkTable entries with current values
+    updateNetworkTables();
+  }
 
-    // Update accelerometer readings
+  private void updateNetworkTables() {
     m_accelXEntry.setDouble(m_accelerometer.getX());
     m_accelYEntry.setDouble(m_accelerometer.getY());
     m_accelZEntry.setDouble(m_accelerometer.getZ());
 
-    // Update motor outputs
     m_leftMotorOutputEntry.setDouble(m_leftMotor.get());
     m_rightMotorOutputEntry.setDouble(m_rightMotor.get());
     m_leftFollowerOutputEntry.setDouble(m_leftFollower.get());
     m_rightFollowerOutputEntry.setDouble(m_rightFollower.get());
 
-    // Update match timer
     m_timerEntry.setDouble(Timer.getMatchTime());
 
     m_fieldPositionEntry.setString(m_field.getRobotPose().toString());
@@ -106,7 +112,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    m_robotDrive.arcadeDrive(-m_driverController.getLeftY(), -m_driverController.getRightX());
+    double speed = -m_driverController.getLeftY();
+    double rotation = -m_driverController.getRightX();
+    m_robotDrive.arcadeDrive(speed, rotation);
   }
 
   @Override
@@ -120,55 +128,65 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     switch (m_autoSelected) {
-    case kCustomAuto1:
-      // Drive forward for 2 seconds, then turn right for 1 second
-      if (m_timer.get() < 2.0) {
-        m_robotDrive.arcadeDrive(0.5, 0.0); // Move forward with 50% speed
-      } else if (m_timer.get() < 3.0) {
-        m_robotDrive.arcadeDrive(0.0, 0.5); // Turn right with 50% speed
-      } else {
-        m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
-      }
-      break;
-    case kCustomAuto2:
-      // Drive forward for 3 seconds, then turn left for 1.5 seconds
-      if (m_timer.get() < 3.0) {
-        m_robotDrive.arcadeDrive(0.6, 0.0); // Move forward with 60% speed
-      } else if (m_timer.get() < 4.5) {
-        m_robotDrive.arcadeDrive(0.0, -0.6); // Turn left with 60% speed
-      } else {
-        m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
-      }
-      break;
-    case kCustomAuto3:
-      // Drive forward for 1.5 seconds, turn right for 2 seconds, and then drive forward again
-      if (m_timer.get() < 1.5) {
-        m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward with 70% speed
-      } else if (m_timer.get() < 3.5) {
-        m_robotDrive.arcadeDrive(0.0, 0.7); // Turn right with 70% speed
-      } else if (m_timer.get() < 5.0) {
-        m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward again with 70% speed
-      } else {
-        m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
-      }
-      break;
-    case kDefaultAuto:
-    default:
-      // Drive forward for 4 seconds, just for testing 
-      if (m_timer.get() < 4.0) {
-        m_robotDrive.arcadeDrive(1.0, 0.0); // Move forward with 100% speed
-      } else {
-        m_robotDrive.arcadeDrive(0.0, 0.0); // Stop after 4 seconds
-      }
-      break;
+      case kCustomAuto1:
+        runAutoRoutine1();
+        break;
+      case kCustomAuto2:
+        runAutoRoutine2();
+        break;
+      case kCustomAuto3:
+        runAutoRoutine3();
+        break;
+      case kDefaultAuto:
+      default:
+        runDefaultAuto();
+        break;
     }
-
-    // Update the Field2d position in autonomous
     updateField2d();
   }
 
+  private void runAutoRoutine1() {
+    if (m_timer.get() < 2.0) {
+      m_robotDrive.arcadeDrive(0.5, 0.0); // Move forward with 50% speed
+    } else if (m_timer.get() < 3.0) {
+      m_robotDrive.arcadeDrive(0.0, 0.5); // Turn right with 50% speed
+    } else {
+      m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
+    }
+  }
+
+  private void runAutoRoutine2() {
+    if (m_timer.get() < 3.0) {
+      m_robotDrive.arcadeDrive(0.6, 0.0); // Move forward with 60% speed
+    } else if (m_timer.get() < 4.5) {
+      m_robotDrive.arcadeDrive(0.0, -0.6); // Turn left with 60% speed
+    } else {
+      m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
+    }
+  }
+
+  private void runAutoRoutine3() {
+    if (m_timer.get() < 1.5) {
+      m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward with 70% speed
+    } else if (m_timer.get() < 3.5) {
+      m_robotDrive.arcadeDrive(0.0, 0.7); // Turn right with 70% speed
+    } else if (m_timer.get() < 5.0) {
+      m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward again with 70% speed
+    } else {
+      m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
+    }
+  }
+
+  private void runDefaultAuto() {
+    if (m_timer.get() < 4.0) {
+      m_robotDrive.arcadeDrive(1.0, 0.0); // Move forward with 100% speed
+    } else {
+      m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
+    }
+  }
+
   private void updateField2d() {
-    // Get the current pose from the drivetrain and update the Field2d object
+    // Updating the field visualization, I have  really good odometry
     m_field.setRobotPose(m_field.getRobotPose());
   }
 }
