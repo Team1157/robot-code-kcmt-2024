@@ -1,8 +1,12 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
@@ -11,11 +15,15 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
-
 public class Robot extends TimedRobot {
-    private Drivetrain m_drivetrain;
-    private Joystick m_joystick;
-    private BuiltInAccelerometer m_accelerometer;
+  private final PWMTalonSRX m_leftMotor = new PWMTalonSRX(0);
+  private final PWMTalonSRX m_rightMotor = new PWMTalonSRX(2);
+  private final PWMTalonSRX m_leftFollower = new PWMTalonSRX(1);
+  private final PWMTalonSRX m_rightFollower = new PWMTalonSRX(3);
+  private final DifferentialDrive m_robotDrive =
+      new DifferentialDrive(m_leftMotor::set, m_rightMotor::set);
+  private final XboxController m_driverController = new XboxController(0);
+  private BuiltInAccelerometer m_accelerometer;
     private NetworkTableInstance m_ntInstance;
     private NetworkTable m_dashboardTable;
     private NetworkTableEntry m_accelXEntry;
@@ -30,74 +38,75 @@ public class Robot extends TimedRobot {
     // Field2d object for field visualization
     private Field2d m_field;
 
-    @Override
-    public void robotInit() {
-        m_chooser.setDefaultOption("auto0", kDefaultAuto);
-        m_chooser.addOption("auto1", kCustomAuto);
-        SmartDashboard.putData("Auto choices", m_chooser);
-        m_drivetrain = new Drivetrain();
-        m_joystick = new Joystick(0);  // Use joystick on port 0
-        m_accelerometer = new BuiltInAccelerometer();
 
-        // Initialize NetworkTables
-        m_ntInstance = NetworkTableInstance.getDefault();
-        m_dashboardTable = m_ntInstance.getTable("SmartDashboard");
+  public Robot() {
+    SendableRegistry.addChild(m_robotDrive, m_leftMotor);
+    SendableRegistry.addChild(m_robotDrive, m_rightMotor);
+  }
 
-        // Create NetworkTable entries
-        m_accelXEntry = m_dashboardTable.getEntry("AccelX");
-        m_accelYEntry = m_dashboardTable.getEntry("AccelY");
-        m_accelZEntry = m_dashboardTable.getEntry("AccelZ");
-        m_dashboardTable.getEntry("TargetSpeed");
+  @Override
+  public void robotInit() {
+    m_chooser.setDefaultOption("auto0", kDefaultAuto);
+    m_chooser.addOption("auto1", kCustomAuto);
+    SmartDashboard.putData("Auto choices", m_chooser);
 
-        // Initialize the Field2d object
-        m_field = new Field2d();
-        SmartDashboard.putData("Field", m_field);
-    }
-    
-    @Override
-    public void autonomousInit() {
-        m_autoSelected = m_chooser.getSelected();
-        System.out.println("Auto selected: " + m_autoSelected);
-        m_timer.reset();
-        m_timer.start();
-    }
-  
-    @Override
-    public void autonomousPeriodic() {
-        switch (m_autoSelected) {
-            case kCustomAuto:
-                // auto1 code idk something like a drive to centerline and disrupt other bots, we win at chicken
-                break;
-            case kDefaultAuto:
-            default:
-                // Drive forward for 4 seconds, just for testing 
-                if (m_timer.get() < 4.0) {
-                    m_drivetrain.arcadeDrive(1.0, 0.0); // Move forward with 100% speed
-                } else {
-                    m_drivetrain.arcadeDrive(0.0, 0.0); // Stop after 4 seconds
-                }
-                break;
-        }
+    m_leftMotor.addFollower(m_leftFollower);
+    m_rightMotor.addFollower(m_rightFollower);
+    m_rightMotor.setInverted(true);
+    m_accelerometer = new BuiltInAccelerometer();
 
-        // Update the Field2d position in autonomous so we know where its going idk some of the driverstations have a bad view from behind the line
-        updateField2d();
-    }
-    
-    @Override
-    public void teleopPeriodic() {
-        double forwardBackward = -m_joystick.getRawAxis(1); // Forward/backward with left stick Y-axis (index 1)
-        double leftRight = m_joystick.getRawAxis(0);       // Left/right turning with left stick X-axis (index 0)
-        m_drivetrain.arcadeDrive(forwardBackward, leftRight);
-        m_accelXEntry.setDouble(m_accelerometer.getX());        // X-axis acceleration
-        m_accelYEntry.setDouble(m_accelerometer.getY());        // Y-axis acceleration
-        m_accelZEntry.setDouble(m_accelerometer.getZ());        // Z-axis acceleration
+    // Initialize NetworkTables
+    m_ntInstance = NetworkTableInstance.getDefault();
+    m_dashboardTable = m_ntInstance.getTable("SmartDashboard");
 
-        // Update the Field2d position in teleop
-        updateField2d();
-    }
+    // Create NetworkTable entries
+    m_accelXEntry = m_dashboardTable.getEntry("AccelX");
+    m_accelYEntry = m_dashboardTable.getEntry("AccelY");
+    m_accelZEntry = m_dashboardTable.getEntry("AccelZ");
+    m_dashboardTable.getEntry("TargetSpeed");
 
-    private void updateField2d() {
-        // Get the current pose from the drivetrain and update the Field2d object
-        m_field.setRobotPose(m_field.getRobotPose());
-    }
+    // Initialize the Field2d object
+    m_field = new Field2d();
+    SmartDashboard.putData("Field", m_field);
+
+  }
+
+  @Override
+  public void teleopPeriodic() {
+    m_robotDrive.arcadeDrive(-m_driverController.getLeftY(), -m_driverController.getRightX());
+  }
+      
+  @Override
+  public void autonomousInit() {
+      m_autoSelected = m_chooser.getSelected();
+      System.out.println("Auto selected: " + m_autoSelected);
+      m_timer.reset();
+      m_timer.start();
+  }
+
+  @Override
+  public void autonomousPeriodic() {
+      switch (m_autoSelected) {
+          case kCustomAuto:
+              // auto1 code idk something like a drive to centerline and disrupt other bots, we win at chicken
+              break;
+          case kDefaultAuto:
+          default:
+              // Drive forward for 4 seconds, just for testing 
+              if (m_timer.get() < 4.0) {
+                  m_robotDrive.arcadeDrive(1.0, 0.0); // Move forward with 100% speed
+              } else {
+                  m_robotDrive.arcadeDrive(0.0, 0.0); // Stop after 4 seconds
+              }
+              break;
+      }
+
+      // Update the Field2d position in autonomous so we know where its going idk some of the driverstations have a bad view from behind the line
+      updateField2d();
+  }
+
+  private void updateField2d() {
+    // Get the current pose from the drivetrain and update the Field2d object
+    m_field.setRobotPose(m_field.getRobotPose());
+}
 }
