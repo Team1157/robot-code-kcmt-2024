@@ -1,18 +1,18 @@
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.BuiltInAccelerometer;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
   private final PWMTalonSRX m_leftMotor = new PWMTalonSRX(0);
@@ -28,6 +28,12 @@ public class Robot extends TimedRobot {
   private NetworkTableEntry m_accelXEntry;
   private NetworkTableEntry m_accelYEntry;
   private NetworkTableEntry m_accelZEntry;
+  private NetworkTableEntry m_leftMotorOutputEntry;
+  private NetworkTableEntry m_rightMotorOutputEntry;
+  private NetworkTableEntry m_leftFollowerOutputEntry;
+  private NetworkTableEntry m_rightFollowerOutputEntry;
+  private NetworkTableEntry m_timerEntry;
+  private NetworkTableEntry m_fieldPositionEntry;
   private static final String kDefaultAuto = "auto0";
   private static final String kCustomAuto1 = "auto1";
   private static final String kCustomAuto2 = "auto2";
@@ -36,7 +42,7 @@ public class Robot extends TimedRobot {
   private final SendableChooser < String > m_chooser = new SendableChooser < > ();
   private final Timer m_timer = new Timer();
 
-  // Field2d object for field visualization
+  // Field2d object for field visualization also not at all implemented given we're a vision-les tank drive
   private Field2d m_field;
 
   public Robot() {
@@ -61,15 +67,41 @@ public class Robot extends TimedRobot {
     m_ntInstance = NetworkTableInstance.getDefault();
     m_dashboardTable = m_ntInstance.getTable("SmartDashboard");
 
-    // Create NetworkTable entries
+    // Create NetworkTable entries for various sensors and data
     m_accelXEntry = m_dashboardTable.getEntry("AccelX");
     m_accelYEntry = m_dashboardTable.getEntry("AccelY");
     m_accelZEntry = m_dashboardTable.getEntry("AccelZ");
-    m_dashboardTable.getEntry("TargetSpeed");
+    m_leftMotorOutputEntry = m_dashboardTable.getEntry("LeftMotorOutput");
+    m_rightMotorOutputEntry = m_dashboardTable.getEntry("RightMotorOutput");
+    m_leftFollowerOutputEntry = m_dashboardTable.getEntry("LeftFollowerOutput");
+    m_rightFollowerOutputEntry = m_dashboardTable.getEntry("RightFollowerOutput");
+    m_timerEntry = m_dashboardTable.getEntry("MatchTime");
+    m_fieldPositionEntry = m_dashboardTable.getEntry("FieldPosition");
 
     // Initialize the Field2d object
     m_field = new Field2d();
     SmartDashboard.putData("Field", m_field);
+  }
+
+  @Override
+  public void robotPeriodic() {
+    // Update NetworkTable entries with current values
+
+    // Update accelerometer readings
+    m_accelXEntry.setDouble(m_accelerometer.getX());
+    m_accelYEntry.setDouble(m_accelerometer.getY());
+    m_accelZEntry.setDouble(m_accelerometer.getZ());
+
+    // Update motor outputs
+    m_leftMotorOutputEntry.setDouble(m_leftMotor.get());
+    m_rightMotorOutputEntry.setDouble(m_rightMotor.get());
+    m_leftFollowerOutputEntry.setDouble(m_leftFollower.get());
+    m_rightFollowerOutputEntry.setDouble(m_rightFollower.get());
+
+    // Update match timer
+    m_timerEntry.setDouble(Timer.getMatchTime());
+
+    m_fieldPositionEntry.setString(m_field.getRobotPose().toString());
   }
 
   @Override
