@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -30,7 +29,9 @@ public class Robot extends TimedRobot {
   private NetworkTableEntry m_accelYEntry;
   private NetworkTableEntry m_accelZEntry;
   private static final String kDefaultAuto = "auto0";
-  private static final String kCustomAuto = "auto1";
+  private static final String kCustomAuto1 = "auto1";
+  private static final String kCustomAuto2 = "auto2";
+  private static final String kCustomAuto3 = "auto3";
   private String m_autoSelected;
   private final SendableChooser < String > m_chooser = new SendableChooser < > ();
   private final Timer m_timer = new Timer();
@@ -46,7 +47,9 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     m_chooser.setDefaultOption("auto0", kDefaultAuto);
-    m_chooser.addOption("auto1", kCustomAuto);
+    m_chooser.addOption("auto1", kCustomAuto1);
+    m_chooser.addOption("auto2", kCustomAuto2);
+    m_chooser.addOption("auto3", kCustomAuto3);
     SmartDashboard.putData("Auto choices", m_chooser);
 
     m_leftMotor.addFollower(m_leftFollower);
@@ -67,7 +70,6 @@ public class Robot extends TimedRobot {
     // Initialize the Field2d object
     m_field = new Field2d();
     SmartDashboard.putData("Field", m_field);
-
   }
 
   @Override
@@ -86,8 +88,37 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     switch (m_autoSelected) {
-    case kCustomAuto:
-      // auto1 code idk something like a drive to centerline and disrupt other bots, we win at chicken
+    case kCustomAuto1:
+      // Drive forward for 2 seconds, then turn right for 1 second
+      if (m_timer.get() < 2.0) {
+        m_robotDrive.arcadeDrive(0.5, 0.0); // Move forward with 50% speed
+      } else if (m_timer.get() < 3.0) {
+        m_robotDrive.arcadeDrive(0.0, 0.5); // Turn right with 50% speed
+      } else {
+        m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
+      }
+      break;
+    case kCustomAuto2:
+      // Drive forward for 3 seconds, then turn left for 1.5 seconds
+      if (m_timer.get() < 3.0) {
+        m_robotDrive.arcadeDrive(0.6, 0.0); // Move forward with 60% speed
+      } else if (m_timer.get() < 4.5) {
+        m_robotDrive.arcadeDrive(0.0, -0.6); // Turn left with 60% speed
+      } else {
+        m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
+      }
+      break;
+    case kCustomAuto3:
+      // Drive forward for 1.5 seconds, turn right for 2 seconds, and then drive forward again
+      if (m_timer.get() < 1.5) {
+        m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward with 70% speed
+      } else if (m_timer.get() < 3.5) {
+        m_robotDrive.arcadeDrive(0.0, 0.7); // Turn right with 70% speed
+      } else if (m_timer.get() < 5.0) {
+        m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward again with 70% speed
+      } else {
+        m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
+      }
       break;
     case kDefaultAuto:
     default:
@@ -100,7 +131,7 @@ public class Robot extends TimedRobot {
       break;
     }
 
-    // Update the Field2d position in autonomous so we know where its going idk some of the driverstations have a bad view from behind the line
+    // Update the Field2d position in autonomous
     updateField2d();
   }
 
