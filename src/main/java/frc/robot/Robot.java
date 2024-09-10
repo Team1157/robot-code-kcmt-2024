@@ -21,23 +21,22 @@ public class Robot extends TimedRobot {
   private final PWMTalonSRX m_leftFollower = new PWMTalonSRX(1);
   private final PWMTalonSRX m_rightFollower = new PWMTalonSRX(3);
   private final DifferentialDrive m_robotDrive =
-      new DifferentialDrive(m_leftMotor::set, m_rightMotor::set);
+  new DifferentialDrive(m_leftMotor::set, m_rightMotor::set);
   private final XboxController m_driverController = new XboxController(0);
   private BuiltInAccelerometer m_accelerometer;
-    private NetworkTableInstance m_ntInstance;
-    private NetworkTable m_dashboardTable;
-    private NetworkTableEntry m_accelXEntry;
-    private NetworkTableEntry m_accelYEntry;
-    private NetworkTableEntry m_accelZEntry;
-    private static final String kDefaultAuto = "auto0";
-    private static final String kCustomAuto = "auto1";
-    private String m_autoSelected;
-    private final SendableChooser<String> m_chooser = new SendableChooser<>();
-    private final Timer m_timer = new Timer();
+  private NetworkTableInstance m_ntInstance;
+  private NetworkTable m_dashboardTable;
+  private NetworkTableEntry m_accelXEntry;
+  private NetworkTableEntry m_accelYEntry;
+  private NetworkTableEntry m_accelZEntry;
+  private static final String kDefaultAuto = "auto0";
+  private static final String kCustomAuto = "auto1";
+  private String m_autoSelected;
+  private final SendableChooser < String > m_chooser = new SendableChooser < > ();
+  private final Timer m_timer = new Timer();
 
-    // Field2d object for field visualization
-    private Field2d m_field;
-
+  // Field2d object for field visualization
+  private Field2d m_field;
 
   public Robot() {
     SendableRegistry.addChild(m_robotDrive, m_leftMotor);
@@ -75,38 +74,38 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     m_robotDrive.arcadeDrive(-m_driverController.getLeftY(), -m_driverController.getRightX());
   }
-      
+
   @Override
   public void autonomousInit() {
-      m_autoSelected = m_chooser.getSelected();
-      System.out.println("Auto selected: " + m_autoSelected);
-      m_timer.reset();
-      m_timer.start();
+    m_autoSelected = m_chooser.getSelected();
+    System.out.println("Auto selected: " + m_autoSelected);
+    m_timer.reset();
+    m_timer.start();
   }
 
   @Override
   public void autonomousPeriodic() {
-      switch (m_autoSelected) {
-          case kCustomAuto:
-              // auto1 code idk something like a drive to centerline and disrupt other bots, we win at chicken
-              break;
-          case kDefaultAuto:
-          default:
-              // Drive forward for 4 seconds, just for testing 
-              if (m_timer.get() < 4.0) {
-                  m_robotDrive.arcadeDrive(1.0, 0.0); // Move forward with 100% speed
-              } else {
-                  m_robotDrive.arcadeDrive(0.0, 0.0); // Stop after 4 seconds
-              }
-              break;
+    switch (m_autoSelected) {
+    case kCustomAuto:
+      // auto1 code idk something like a drive to centerline and disrupt other bots, we win at chicken
+      break;
+    case kDefaultAuto:
+    default:
+      // Drive forward for 4 seconds, just for testing 
+      if (m_timer.get() < 4.0) {
+        m_robotDrive.arcadeDrive(1.0, 0.0); // Move forward with 100% speed
+      } else {
+        m_robotDrive.arcadeDrive(0.0, 0.0); // Stop after 4 seconds
       }
+      break;
+    }
 
-      // Update the Field2d position in autonomous so we know where its going idk some of the driverstations have a bad view from behind the line
-      updateField2d();
+    // Update the Field2d position in autonomous so we know where its going idk some of the driverstations have a bad view from behind the line
+    updateField2d();
   }
 
   private void updateField2d() {
     // Get the current pose from the drivetrain and update the Field2d object
     m_field.setRobotPose(m_field.getRobotPose());
-}
+  }
 }
