@@ -1,6 +1,6 @@
 # todo
 - [X] ~~get talon srx's from 2036~~
-- [ ] Replace current lopsided and mismatched motor controllers with the talon srx's
+- [X] ~~Replace current lopsided and mismatched motor controllers with the talon srx's~~
 - [X] ~~Get registered for kcmt (yay!!!)~~  
 - [x] ~~Assemble chassis~~  
 - [x] ~~Install motors, build gearboxes~~  
@@ -11,11 +11,11 @@
 - [X] ~~wire pdp to motor controllers~~
 - [X] ~~Wire motors to motor controllers~~  
 - [X] ~~Mount motor controllers (2 spark maxes, 2 victors)~~
-- [X] ~~victor wired to pwm 0, left motor 1~~
-- [X] ~~spark wired to pwm 1, left motor 2~~
-- [X] ~~spark wired to pwm 2, right motor 1~~
-- [X] ~~victor wired to pwm 3, right motor 2~~
-- [ ] Make bumper mounts/make bumpers if existing ones don't fit  
+- [X] ~~talon srx wired to pwm 0, left motor 1~~
+- [X] ~~talon srx wired to pwm 1, left motor 2~~
+- [X] ~~talon srx wired to pwm 2, right motor 1~~
+- [X] ~~talon srx wired to pwm 3, right motor 2~~
+- [ ] Make quick and dirty bumpers with duct tape and pool noodles
 - [x] ~~Mount roboRio~~  
 - [X] ~~Wire roboRio to motor controllers, pdp can, and power~~  
 - [X] ~~Borrow/buy vh-109 [radio](https://wcproducts.com/products/frc-radio) for kcmt, Debbie English said one can be provided)~~
@@ -28,5 +28,6 @@
 - [x] ~~Setup NI driverstation on a laptop/team computer~~  
 - [x] ~~Write robot code (tested!)~~  
 - [X] ~~Make chassis rigid~~  
-- [ ] Mechanism\!?\! Ie a shooter and intake or just a big blocker like the kiddie pool team
-- [X] ~~Autos (sorta just a basic forwards drive spoiler)~~
+- [ ] Get kitbot mechanism from debbie/4499 and have new mechanical build it and use it as a learning resource
+- [ ] Custom mechanism? Ie a simple shooter and chute intake
+- [X] ~~Autos (just drives forwards for 4 seconds or does nothing)~~
