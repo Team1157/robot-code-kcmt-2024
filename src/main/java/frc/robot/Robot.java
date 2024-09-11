@@ -4,7 +4,11 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -13,10 +17,11 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 
 public class Robot extends TimedRobot {
+  private ADXRS450_Gyro gyro;
+
+    
   private static final int LEFT_MOTOR_PORT = 0;
   private static final int LEFT_FOLLOWER_PORT = 1;
   private static final int RIGHT_MOTOR_PORT = 2;
@@ -56,6 +61,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
+    gyro.calibrate();
     configureAutoChooser();
     configureMotors();
     initializeNetworkTables();
@@ -92,8 +99,14 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void robotPeriodic() {
+    public void robotPeriodic() {
+    //gets the 
+    double angle = gyro.getAngle();
+    double rate = gyro.getRate();
     updateNetworkTables();
+    //adds the gyro to smart dashboard
+    SmartDashboard.putNumber("Gyro Angle", angle);
+    SmartDashboard.putNumber("Gyro Rate", rate);
   }
 
   private void updateNetworkTables() {
@@ -126,7 +139,7 @@ public class Robot extends TimedRobot {
     m_timerEntry.setDouble(Timer.getMatchTime());
 
     m_fieldPositionEntry.setString(m_field.getRobotPose().toString());
-            // all 16 pdp channels (starts at 0 as all things should)
+        // all 16 pdp channels (starts at 0 as all things should)
         for (int channel = 0; channel <= 15; channel++) {
           // Get the current for the specified channel, in amps
           double current = m_pdp.getCurrent(channel);
@@ -135,6 +148,7 @@ public class Robot extends TimedRobot {
           SmartDashboard.putNumber("Current Channel " + channel, current);
       }
   }
+
 
   @Override
   public void teleopPeriodic() {
@@ -214,5 +228,14 @@ public class Robot extends TimedRobot {
   private void updateField2d() {
     // Updating the field visualization, I have  really good odometry
     m_field.setRobotPose(m_field.getRobotPose());
+  }
+  public void disabledInit() {
+    // Cleanup when disabled (e.g., close the gyro)
+    gyro.close();
+  }
+
+  @Override
+  public void disabledPeriodic() {
+      // Optional: update dashboard or other periodic tasks
   }
 }
