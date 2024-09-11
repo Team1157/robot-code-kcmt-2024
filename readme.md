@@ -1,4 +1,5 @@
 # todo
+
 - [X] ~~get talon srx's from 2036~~
 - [X] ~~Replace current lopsided and mismatched motor controllers with the talon srx's~~
 - [X] ~~Get registered for kcmt (yay!!!)~~  
@@ -15,7 +16,7 @@
 - [X] ~~talon srx wired to pwm 1, left motor 2~~
 - [X] ~~talon srx wired to pwm 2, right motor 1~~
 - [X] ~~talon srx wired to pwm 3, right motor 2~~
-- [ ] Make quick and dirty bumpers with duct tape and pool noodles
+- [x] ~~Make quick and dirty bumpers with pool noodles~~
 - [x] ~~Mount roboRio~~  
 - [X] ~~Wire roboRio to motor controllers, pdp can, and power~~  
 - [X] ~~Borrow/buy vh-109 [radio](https://wcproducts.com/products/frc-radio) for kcmt, Debbie English said one can be provided)~~
