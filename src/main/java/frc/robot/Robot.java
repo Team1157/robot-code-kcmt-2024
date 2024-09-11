@@ -13,13 +13,15 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 
 public class Robot extends TimedRobot {
   private static final int LEFT_MOTOR_PORT = 0;
   private static final int LEFT_FOLLOWER_PORT = 1;
   private static final int RIGHT_MOTOR_PORT = 2;
   private static final int RIGHT_FOLLOWER_PORT = 3;
-
+  PowerDistribution m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
   private final PWMTalonSRX m_leftMotor = new PWMTalonSRX(LEFT_MOTOR_PORT);
   private final PWMTalonSRX m_rightMotor = new PWMTalonSRX(RIGHT_MOTOR_PORT);
   private final PWMTalonSRX m_leftFollower = new PWMTalonSRX(LEFT_FOLLOWER_PORT);
@@ -78,7 +80,23 @@ public class Robot extends TimedRobot {
   private void initializeNetworkTables() {
     m_ntInstance = NetworkTableInstance.getDefault();
     m_dashboardTable = m_ntInstance.getTable("SmartDashboard");
+    double voltage = m_pdp.getVoltage();
+    double temperatureCelsius = m_pdp.getTemperature();
+    SmartDashboard.putNumber("Temperature", temperatureCelsius);
+    SmartDashboard.putNumber("Voltage", voltage);
+    // Get the total current of all channels.
+    double totalCurrent = m_pdp.getTotalCurrent();
+    SmartDashboard.putNumber("Total Current", totalCurrent);
 
+    // Get the total power of all channels.
+    // Power is the bus voltage multiplied by the current with the units Watts.
+    double totalPower = m_pdp.getTotalPower();
+    SmartDashboard.putNumber("Total Power", totalPower);
+
+    // Get the total energy of all channels.
+    // Energy is the power summed over time with units Joules.
+    double totalEnergy = m_pdp.getTotalEnergy();
+    SmartDashboard.putNumber("Total Energy", totalEnergy);
     m_accelXEntry = m_dashboardTable.getEntry("AccelX");
     m_accelYEntry = m_dashboardTable.getEntry("AccelY");
     m_accelZEntry = m_dashboardTable.getEntry("AccelZ");
@@ -88,6 +106,15 @@ public class Robot extends TimedRobot {
     m_rightFollowerOutputEntry = m_dashboardTable.getEntry("RightFollowerOutput");
     m_timerEntry = m_dashboardTable.getEntry("MatchTime");
     m_fieldPositionEntry = m_dashboardTable.getEntry("FieldPosition");
+
+        // all 16 pdp channels (starts at 0 as all things should)
+        for (int channel = 0; channel <= 15; channel++) {
+          // Get the current for the specified channel, in amps
+          double current = m_pdp.getCurrent(channel);
+          
+          // Send the current value to our amazing dashboard
+          SmartDashboard.putNumber("Current Channel " + channel, current);
+      }
   }
 
   @Override
