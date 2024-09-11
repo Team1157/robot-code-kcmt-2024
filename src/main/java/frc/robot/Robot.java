@@ -80,6 +80,26 @@ public class Robot extends TimedRobot {
   private void initializeNetworkTables() {
     m_ntInstance = NetworkTableInstance.getDefault();
     m_dashboardTable = m_ntInstance.getTable("SmartDashboard");
+    m_accelXEntry = m_dashboardTable.getEntry("AccelX");
+    m_accelYEntry = m_dashboardTable.getEntry("AccelY");
+    m_accelZEntry = m_dashboardTable.getEntry("AccelZ");
+    m_leftMotorOutputEntry = m_dashboardTable.getEntry("LeftMotorOutput");
+    m_rightMotorOutputEntry = m_dashboardTable.getEntry("RightMotorOutput");
+    m_leftFollowerOutputEntry = m_dashboardTable.getEntry("LeftFollowerOutput");
+    m_rightFollowerOutputEntry = m_dashboardTable.getEntry("RightFollowerOutput");
+    m_timerEntry = m_dashboardTable.getEntry("MatchTime");
+    m_fieldPositionEntry = m_dashboardTable.getEntry("FieldPosition");
+  }
+
+  @Override
+  public void robotPeriodic() {
+    updateNetworkTables();
+  }
+
+  private void updateNetworkTables() {
+    m_accelXEntry.setDouble(m_accelerometer.getX());
+    m_accelYEntry.setDouble(m_accelerometer.getY());
+    m_accelZEntry.setDouble(m_accelerometer.getZ());
     double voltage = m_pdp.getVoltage();
     double temperatureCelsius = m_pdp.getTemperature();
     SmartDashboard.putNumber("Temperature", temperatureCelsius);
@@ -97,35 +117,6 @@ public class Robot extends TimedRobot {
     // Energy is the power summed over time with units Joules.
     double totalEnergy = m_pdp.getTotalEnergy();
     SmartDashboard.putNumber("Total Energy", totalEnergy);
-    m_accelXEntry = m_dashboardTable.getEntry("AccelX");
-    m_accelYEntry = m_dashboardTable.getEntry("AccelY");
-    m_accelZEntry = m_dashboardTable.getEntry("AccelZ");
-    m_leftMotorOutputEntry = m_dashboardTable.getEntry("LeftMotorOutput");
-    m_rightMotorOutputEntry = m_dashboardTable.getEntry("RightMotorOutput");
-    m_leftFollowerOutputEntry = m_dashboardTable.getEntry("LeftFollowerOutput");
-    m_rightFollowerOutputEntry = m_dashboardTable.getEntry("RightFollowerOutput");
-    m_timerEntry = m_dashboardTable.getEntry("MatchTime");
-    m_fieldPositionEntry = m_dashboardTable.getEntry("FieldPosition");
-
-        // all 16 pdp channels (starts at 0 as all things should)
-        for (int channel = 0; channel <= 15; channel++) {
-          // Get the current for the specified channel, in amps
-          double current = m_pdp.getCurrent(channel);
-          
-          // Send the current value to our amazing dashboard
-          SmartDashboard.putNumber("Current Channel " + channel, current);
-      }
-  }
-
-  @Override
-  public void robotPeriodic() {
-    updateNetworkTables();
-  }
-
-  private void updateNetworkTables() {
-    m_accelXEntry.setDouble(m_accelerometer.getX());
-    m_accelYEntry.setDouble(m_accelerometer.getY());
-    m_accelZEntry.setDouble(m_accelerometer.getZ());
 
     m_leftMotorOutputEntry.setDouble(m_leftMotor.get());
     m_rightMotorOutputEntry.setDouble(m_rightMotor.get());
@@ -135,6 +126,14 @@ public class Robot extends TimedRobot {
     m_timerEntry.setDouble(Timer.getMatchTime());
 
     m_fieldPositionEntry.setString(m_field.getRobotPose().toString());
+            // all 16 pdp channels (starts at 0 as all things should)
+        for (int channel = 0; channel <= 15; channel++) {
+          // Get the current for the specified channel, in amps
+          double current = m_pdp.getCurrent(channel);
+          
+          // Send the current value to our amazing dashboard
+          SmartDashboard.putNumber("Current Channel " + channel, current);
+      }
   }
 
   @Override
