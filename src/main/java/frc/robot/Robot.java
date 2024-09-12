@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends TimedRobot {
   private ADXRS450_Gyro gyro;
 
-    
+  // Motor ports and PDP setup
   private static final int LEFT_MOTOR_PORT = 0;
   private static final int LEFT_FOLLOWER_PORT = 1;
   private static final int RIGHT_MOTOR_PORT = 2;
@@ -32,9 +32,11 @@ public class Robot extends TimedRobot {
   private final PWMTalonSRX m_leftFollower = new PWMTalonSRX(LEFT_FOLLOWER_PORT);
   private final PWMTalonSRX m_rightFollower = new PWMTalonSRX(RIGHT_FOLLOWER_PORT);
 
+  // Differential drive and controller setup
   private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
   private final XboxController m_driverController = new XboxController(0);
 
+  // Sensors and NetworkTables
   private BuiltInAccelerometer m_accelerometer;
   private NetworkTableInstance m_ntInstance;
   private NetworkTable m_dashboardTable;
@@ -43,6 +45,7 @@ public class Robot extends TimedRobot {
   private NetworkTableEntry m_leftFollowerOutputEntry, m_rightFollowerOutputEntry;
   private NetworkTableEntry m_timerEntry, m_fieldPositionEntry;
 
+  // Autonomous mode options
   private static final String kDefaultAuto = "auto0";
   private static final String kCustomAuto1 = "auto1";
   private static final String kCustomAuto2 = "auto2";
@@ -52,8 +55,10 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private final Timer m_timer = new Timer();
 
+  // Field2d visualization
   private final Field2d m_field = new Field2d();
 
+  // Constructor to register motor objects with the SendableRegistry
   public Robot() {
     SendableRegistry.addChild(m_robotDrive, m_leftMotor);
     SendableRegistry.addChild(m_robotDrive, m_rightMotor);
@@ -61,14 +66,22 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    // Initialize and calibrate gyro
     gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
     gyro.calibrate();
+    
+    // Configure autonomous choices and motors
     configureAutoChooser();
     configureMotors();
+    
+    // Initialize NetworkTables for dashboard communication
     initializeNetworkTables();
+    
+    // Add field visualization to SmartDashboard
     SmartDashboard.putData("Field", m_field);
   }
 
+  // Configure autonomous mode chooser
   private void configureAutoChooser() {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("Custom Auto 1", kCustomAuto1);
@@ -77,13 +90,15 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("Auto choices", m_chooser);
   }
 
+  // Configure motor inversion and followers
   private void configureMotors() {
     m_leftMotor.addFollower(m_leftFollower);
     m_rightMotor.addFollower(m_rightFollower);
-    m_rightMotor.setInverted(true);
+    m_rightMotor.setInverted(true); // Invert right motor
     m_accelerometer = new BuiltInAccelerometer();
   }
 
+  // Initialize NetworkTables for communication with the dashboard
   private void initializeNetworkTables() {
     m_ntInstance = NetworkTableInstance.getDefault();
     m_dashboardTable = m_ntInstance.getTable("SmartDashboard");
@@ -99,59 +114,54 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-    public void robotPeriodic() {
-    //gets the 
+  public void robotPeriodic() {
+    // Update gyro data
     double angle = gyro.getAngle();
     double rate = gyro.getRate();
+    
+    // Update NetworkTables with sensor data
     updateNetworkTables();
-    //adds the gyro to smart dashboard
+
+    // Display gyro values on SmartDashboard
     SmartDashboard.putNumber("Gyro Angle", angle);
     SmartDashboard.putNumber("Gyro Rate", rate);
   }
 
+  // Send sensor and motor data to NetworkTables
   private void updateNetworkTables() {
     m_accelXEntry.setDouble(m_accelerometer.getX());
     m_accelYEntry.setDouble(m_accelerometer.getY());
     m_accelZEntry.setDouble(m_accelerometer.getZ());
+
+    // Send power distribution data
     double voltage = m_pdp.getVoltage();
     double temperatureCelsius = m_pdp.getTemperature();
     SmartDashboard.putNumber("Temperature", temperatureCelsius);
     SmartDashboard.putNumber("Voltage", voltage);
-    // Get the total current of all channels.
-    double totalCurrent = m_pdp.getTotalCurrent();
-    SmartDashboard.putNumber("Total Current", totalCurrent);
+    SmartDashboard.putNumber("Total Current", m_pdp.getTotalCurrent());
+    SmartDashboard.putNumber("Total Power", m_pdp.getTotalPower());
+    SmartDashboard.putNumber("Total Energy", m_pdp.getTotalEnergy());
 
-    // Get the total power of all channels.
-    // Power is the bus voltage multiplied by the current with the units Watts.
-    double totalPower = m_pdp.getTotalPower();
-    SmartDashboard.putNumber("Total Power", totalPower);
-
-    // Get the total energy of all channels.
-    // Energy is the power summed over time with units Joules.
-    double totalEnergy = m_pdp.getTotalEnergy();
-    SmartDashboard.putNumber("Total Energy", totalEnergy);
-
+    // Send motor outputs to dashboard
     m_leftMotorOutputEntry.setDouble(m_leftMotor.get());
     m_rightMotorOutputEntry.setDouble(m_rightMotor.get());
     m_leftFollowerOutputEntry.setDouble(m_leftFollower.get());
     m_rightFollowerOutputEntry.setDouble(m_rightFollower.get());
 
+    // Send timer and field position data
     m_timerEntry.setDouble(Timer.getMatchTime());
-
     m_fieldPositionEntry.setString(m_field.getRobotPose().toString());
-        // all 16 pdp channels (starts at 0 as all things should)
-        for (int channel = 0; channel <= 15; channel++) {
-          // Get the current for the specified channel, in amps
-          double current = m_pdp.getCurrent(channel);
-          
-          // Send the current value to our amazing dashboard
-          SmartDashboard.putNumber("Current Channel " + channel, current);
-      }
-  }
 
+    // Display current for each PDP channel
+    for (int channel = 0; channel <= 15; channel++) {
+      double current = m_pdp.getCurrent(channel);
+      SmartDashboard.putNumber("Current Channel " + channel, current);
+    }
+  }
 
   @Override
   public void teleopPeriodic() {
+    // Read controller inputs and control robot with arcade drive
     double speed = 2 * -m_driverController.getLeftY();
     double rotation = 2 * -m_driverController.getRawAxis(5);
     m_robotDrive.arcadeDrive(speed, rotation);
@@ -159,6 +169,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    // Get the selected autonomous routine
     m_autoSelected = m_chooser.getSelected();
     System.out.println("Auto selected: " + m_autoSelected);
     m_timer.reset();
@@ -167,6 +178,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
+    // Run the selected autonomous routine
     switch (m_autoSelected) {
       case kCustomAuto1:
         runAutoRoutine1();
@@ -182,51 +194,57 @@ public class Robot extends TimedRobot {
         runDefaultAuto();
         break;
     }
+
+    // Update field visualization
     updateField2d();
   }
 
+  // Auto routine 1: Forward, turn right, stop
   private void runAutoRoutine1() {
     if (m_timer.get() < 2.0) {
-      m_robotDrive.arcadeDrive(0.5, 0.0); // Move forward with 50% speed
+      m_robotDrive.arcadeDrive(0.5, 0.0); // Move forward at 50% speed
     } else if (m_timer.get() < 3.0) {
-      m_robotDrive.arcadeDrive(0.0, 0.5); // Turn right with 50% speed
+      m_robotDrive.arcadeDrive(0.0, 0.5); // Turn right at 50% speed
     } else {
       m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
     }
   }
 
+  // Auto routine 2: Forward, turn left, stop
   private void runAutoRoutine2() {
     if (m_timer.get() < 3.0) {
-      m_robotDrive.arcadeDrive(0.6, 0.0); // Move forward with 60% speed
+      m_robotDrive.arcadeDrive(0.6, 0.0); // Move forward at 60% speed
     } else if (m_timer.get() < 4.5) {
-      m_robotDrive.arcadeDrive(0.0, -0.6); // Turn left with 60% speed
+      m_robotDrive.arcadeDrive(0.0, -0.6); // Turn left at 60% speed
     } else {
       m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
     }
   }
 
+  // Auto routine 3: Forward, turn right, move forward again, stop
   private void runAutoRoutine3() {
     if (m_timer.get() < 1.5) {
-      m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward with 70% speed
+      m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward at 70% speed
     } else if (m_timer.get() < 3.5) {
-      m_robotDrive.arcadeDrive(0.0, 0.7); // Turn right with 70% speed
+      m_robotDrive.arcadeDrive(0.0, 0.7); // Turn right at 70% speed
     } else if (m_timer.get() < 5.0) {
-      m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward again with 70% speed
+      m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward again at 70% speed
     } else {
       m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
     }
   }
 
+  // Default auto routine: Move forward, stop
   private void runDefaultAuto() {
     if (m_timer.get() < 4.0) {
-      m_robotDrive.arcadeDrive(1.0, 0.0); // Move forward with 100% speed
+      m_robotDrive.arcadeDrive(1.0, 0.0); // Move forward at 100% speed
     } else {
       m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
     }
   }
 
+  // Update field visualization with current robot pose
   private void updateField2d() {
-    // Updating the field visualization, I have  really good odometry
     m_field.setRobotPose(m_field.getRobotPose());
   }
 }
