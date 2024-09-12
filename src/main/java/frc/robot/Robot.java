@@ -168,6 +168,12 @@ public class Robot extends TimedRobot {
       double leftY = m_driverController.getLeftY(); // Left stick Y axis (for forward/backward)
       double manualRotation = m_driverController.getRawAxis(5); // Right stick X axis (manual turning)
   
+      // Check if the A button is pressed to reset gyro, idk how its mapped to the gcn controller
+      if (m_driverController.getAButtonPressed()) {
+          gyro.reset();
+          SmartDashboard.putString("Gyro Reset", "Gyro reset at time: " + Timer.getFPGATimestamp());
+      }
+  
       // Calculate desired direction angle from the left stick
       double desiredAngle = Math.toDegrees(Math.atan2(leftX, -leftY)); // Negate leftY because forward is negative
       if (desiredAngle < 0) {
@@ -205,7 +211,7 @@ public class Robot extends TimedRobot {
       // Drive the robot using arcade drive with field-oriented rotation control
       m_robotDrive.arcadeDrive(speed, rotationSpeed);
   }
-
+  
   @Override
   public void autonomousInit() {
     // Get the selected autonomous routine
