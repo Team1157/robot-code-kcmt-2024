@@ -83,10 +83,10 @@ public class Robot extends TimedRobot {
 
   // Configure autonomous mode chooser
   private void configureAutoChooser() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("Custom Auto 1", kCustomAuto1);
-    m_chooser.addOption("Custom Auto 2", kCustomAuto2);
-    m_chooser.addOption("Custom Auto 3", kCustomAuto3);
+    m_chooser.setDefaultOption("Forward for 4 seconds", kDefaultAuto);
+    m_chooser.addOption("Forward, turn right, stop", kCustomAuto1);
+    m_chooser.addOption("Forward, turn left, stop", kCustomAuto2);
+    m_chooser.addOption("Forward, turn right, move forward again, stop", kCustomAuto3);
     SmartDashboard.putData("Auto choices", m_chooser);
   }
 
