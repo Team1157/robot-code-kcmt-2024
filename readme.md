@@ -29,6 +29,8 @@
 - [x] ~~Setup NI driverstation on a laptop/team computer~~  
 - [x] ~~Write robot code (tested!)~~  
 - [X] ~~Make chassis rigid~~  
-- [ ] Get kitbot mechanism from debbie/4499 and have new mechanical build it and use it as a learning resource
-- [ ] Custom mechanism? Ie a simple shooter and chute intake
+- [ ] Pickup/get kitbot from debbie/4499
+- [X] ~~Design simple shooter and chute intake mechanism~~
+- [ ] Fabricate shooter parts
+- [ ] Assemble shooter
 - [X] ~~Autos (just drives forwards for 4 seconds or does nothing)~~
