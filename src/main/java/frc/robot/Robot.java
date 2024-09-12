@@ -229,13 +229,4 @@ public class Robot extends TimedRobot {
     // Updating the field visualization, I have  really good odometry
     m_field.setRobotPose(m_field.getRobotPose());
   }
-  public void disabledInit() {
-    // Cleanup when disabled (e.g., close the gyro)
-    gyro.close();
-  }
-
-  @Override
-  public void disabledPeriodic() {
-      // Optional: update dashboard or other periodic tasks
-  }
 }
