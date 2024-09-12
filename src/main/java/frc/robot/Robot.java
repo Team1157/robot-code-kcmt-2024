@@ -69,7 +69,9 @@ public class Robot extends TimedRobot {
     // Initialize and calibrate gyro
     gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
     gyro.calibrate();
-    
+
+    //sets heading to 0
+    gyro.reset()
     // Configure autonomous choices and motors
     configureAutoChooser();
     configureMotors();
