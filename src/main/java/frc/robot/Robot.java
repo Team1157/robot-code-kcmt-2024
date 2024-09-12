@@ -199,16 +199,15 @@ public class Robot extends TimedRobot {
       // If the driver is manually turning, use that instead of auto-aligning the angle
       double rotationSpeed;
       if (Math.abs(manualRotation) > 0.1) {
-          rotationSpeed = manualRotation * 0.5; // Manual turning (adjust sensitivity as needed)
+          rotationSpeed = manualRotation * 0.5; // Manual turning (I'll adjust sensitivity as needed)
       } else {
           // Auto-align based on the angle error (proportional control)
-          rotationSpeed = angleError * 0.05; // 0.05 is the tuning factor for rotation correction
+          rotationSpeed = angleError * 0.05; // 0.05 is the tuning factor for rotation correction, might oscillate until i tune further
       }
   
       // Calculate speed based on the left stick Y axis (forward/backward)
-      double speed = -leftY * 0.6; // Forward and backward movement, scale speed as needed
-  
-      // Drive the robot using arcade drive with field-oriented rotation control
+      double speed = -leftY; 
+
       m_robotDrive.arcadeDrive(speed, rotationSpeed);
   }
   
