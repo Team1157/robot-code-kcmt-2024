@@ -164,8 +164,8 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
       // Read controller inputs
-      double leftX = m_driverController.getLeftX(); // Left stick X axis (for field-oriented direction)
-      double leftY = m_driverController.getLeftY(); // Left stick Y axis (for forward/backward)
+      double leftX = 1.5 * m_driverController.getLeftX(); // Left stick X axis (for field-oriented direction)
+      double leftY = 1.5 * m_driverController.getLeftY(); // Left stick Y axis (for forward/backward)
       double manualRotation = m_driverController.getRawAxis(5); // Right stick X axis (manual turning)
   
       // Check if the A button is pressed to reset gyro, idk how its mapped to the gcn controller
