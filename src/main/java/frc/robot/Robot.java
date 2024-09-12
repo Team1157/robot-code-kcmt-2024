@@ -166,7 +166,7 @@ public class Robot extends TimedRobot {
       // Read controller inputs
       double leftX = 1.5 * m_driverController.getLeftX(); // Left stick X axis (for field-oriented direction)
       double leftY = 1.5 * m_driverController.getLeftY(); // Left stick Y axis (for forward/backward)
-      double manualRotation = 1.5 m_driverController.getRawAxis(5); // Right stick X axis (manual turning)
+      double manualRotation = 1.5 * m_driverController.getRawAxis(5); // Right stick X axis (manual turning)
   
       // Check if the A button is pressed to reset gyro, idk how its mapped to the gcn controller
       if (m_driverController.getAButtonPressed()) {
