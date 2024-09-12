@@ -161,7 +161,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    // Read controller inputs and control robot with arcade drive
+    // Read controller inputs and control robot with arcade drive (left y works as the left y on the gamecube controller but right x is acttually the trigger analog input on it so we just use its raw axis)
     double speed = 2 * -m_driverController.getLeftY();
     double rotation = 2 * -m_driverController.getRawAxis(5);
     m_robotDrive.arcadeDrive(speed, rotation);
