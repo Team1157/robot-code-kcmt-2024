@@ -71,7 +71,7 @@ public class Robot extends TimedRobot {
     gyro.calibrate();
 
     //sets heading to 0
-    gyro.reset()
+    gyro.reset();
     // Configure autonomous choices and motors
     configureAutoChooser();
     configureMotors();
