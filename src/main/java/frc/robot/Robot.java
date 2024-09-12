@@ -243,7 +243,7 @@ public class Robot extends TimedRobot {
     }
   }
 
-  // Update field visualization with current robot pose
+  // Update field visualization with current robot pose that doesn't actually work lol
   private void updateField2d() {
     m_field.setRobotPose(m_field.getRobotPose());
   }
