@@ -161,12 +161,47 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    // Read controller inputs and control robot with arcade drive 
-    //(left y works as the left y on the gamecube controller but right x is actually 
-    // the trigger analog input on it so we just use its raw axis)
-    double speed = 2 * -m_driverController.getLeftY();
-    double rotation = 2 * -m_driverController.getRawAxis(5);
-    m_robotDrive.arcadeDrive(speed, rotation);
+      // Read controller inputs
+      double leftX = m_driverController.getLeftX(); // Left stick X axis (for field-oriented direction)
+      double leftY = m_driverController.getLeftY(); // Left stick Y axis (for forward/backward)
+      double manualRotation = m_driverController.getRawAxis(5); // Right stick X axis (manual turning)
+  
+      // Calculate desired direction angle from the left stick
+      double desiredAngle = Math.toDegrees(Math.atan2(leftX, -leftY)); // Negate leftY because forward is negative
+      if (desiredAngle < 0) {
+          desiredAngle += 360; // Ensure the angle is positive
+      }
+  
+      // Get the current robot heading from the gyro
+      double currentAngle = gyro.getAngle() % 360; // Ensure angle is between 0 and 360
+      if (currentAngle < 0) {
+          currentAngle += 360;
+      }
+  
+      // Calculate the rotational difference (error) between desired and current angle
+      double angleError = desiredAngle - currentAngle;
+  
+      // Normalize the angle error between -180 and 180 degrees
+      if (angleError > 180) {
+          angleError -= 360;
+      } else if (angleError < -180) {
+          angleError += 360;
+      }
+  
+      // If the driver is manually turning, use that instead of auto-aligning the angle
+      double rotationSpeed;
+      if (Math.abs(manualRotation) > 0.1) {
+          rotationSpeed = manualRotation * 0.5; // Manual turning (adjust sensitivity as needed)
+      } else {
+          // Auto-align based on the angle error (proportional control)
+          rotationSpeed = angleError * 0.05; // 0.05 is the tuning factor for rotation correction
+      }
+  
+      // Calculate speed based on the left stick Y axis (forward/backward)
+      double speed = -leftY * 0.6; // Forward and backward movement, scale speed as needed
+  
+      // Drive the robot using arcade drive with field-oriented rotation control
+      m_robotDrive.arcadeDrive(speed, rotationSpeed);
   }
 
   @Override
