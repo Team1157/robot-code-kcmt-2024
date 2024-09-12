@@ -74,10 +74,10 @@ public class Robot extends TimedRobot {
     configureAutoChooser();
     configureMotors();
     
-    // Initialize NetworkTables for dashboard communication
+    // Initialize NetworkTables for Elastic dashboard communication
     initializeNetworkTables();
     
-    // Add field visualization to SmartDashboard
+    // Add field visualization to Elastic
     SmartDashboard.putData("Field", m_field);
   }
 
@@ -94,11 +94,11 @@ public class Robot extends TimedRobot {
   private void configureMotors() {
     m_leftMotor.addFollower(m_leftFollower);
     m_rightMotor.addFollower(m_rightFollower);
-    m_rightMotor.setInverted(true); // Invert right motor
+    m_rightMotor.setInverted(true); // Invert right motors so it won't just go in circles
     m_accelerometer = new BuiltInAccelerometer();
   }
 
-  // Initialize NetworkTables for communication with the dashboard
+  // Initialize NetworkTables for communication with elastic dashboard
   private void initializeNetworkTables() {
     m_ntInstance = NetworkTableInstance.getDefault();
     m_dashboardTable = m_ntInstance.getTable("SmartDashboard");
