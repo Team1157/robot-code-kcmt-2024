@@ -69,9 +69,7 @@ public class Robot extends TimedRobot {
     // Initialize and calibrate gyro
     gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
     gyro.calibrate();
-
-    //sets heading to 0
-    gyro.reset();
+    
     // Configure autonomous choices and motors
     configureAutoChooser();
     configureMotors();
@@ -163,54 +161,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-      // Read controller inputs
-      double leftX = 1.5 * m_driverController.getLeftX(); // Left stick X axis (for field-oriented direction)
-      double leftY = 1.5 * m_driverController.getLeftY(); // Left stick Y axis (for forward/backward)
-      double manualRotation = 1.5 * m_driverController.getRawAxis(5); // Right stick X axis (manual turning)
-  
-      // Check if the A button is pressed to reset gyro, idk how its mapped to the gcn controller
-      if (m_driverController.getAButtonPressed()) {
-          gyro.reset();
-          SmartDashboard.putString("Gyro Reset", "Gyro reset at time: " + Timer.getFPGATimestamp());
-      }
-  
-      // Calculate desired direction angle from the left stick
-      double desiredAngle = Math.toDegrees(Math.atan2(leftX, -leftY)); // Negate leftY because forward is negative
-      if (desiredAngle < 0) {
-          desiredAngle += 360; // Ensure the angle is positive
-      }
-  
-      // Get the current robot heading from the gyro
-      double currentAngle = gyro.getAngle() % 360; // Ensure angle is between 0 and 360
-      if (currentAngle < 0) {
-          currentAngle += 360;
-      }
-  
-      // Calculate the rotational difference (error) between desired and current angle
-      double angleError = desiredAngle - currentAngle;
-  
-      // Normalize the angle error between -180 and 180 degrees
-      if (angleError > 180) {
-          angleError -= 360;
-      } else if (angleError < -180) {
-          angleError += 360;
-      }
-  
-      // If the driver is manually turning, use that instead of auto-aligning the angle
-      double rotationSpeed;
-      if (Math.abs(manualRotation) > 0.1) {
-          rotationSpeed = manualRotation * 0.5; // Manual turning (I'll adjust sensitivity as needed)
-      } else {
-          // Auto-align based on the angle error (proportional control)
-          rotationSpeed = angleError * 0.05; // 0.05 is the tuning factor for rotation correction, might oscillate until i tune further
-      }
-  
-      // Calculate speed based on the left stick Y axis (forward/backward)
-      double speed = -leftY; 
-
-      m_robotDrive.arcadeDrive(speed, rotationSpeed);
+    // Read controller inputs and control robot with arcade drive 
+    //(left y works as the left y on the gamecube controller but right x is actually 
+    // the trigger analog input on it so we just use its raw axis)
+    double speed = 2 * -m_driverController.getLeftY();
+    double rotation = 2 * -m_driverController.getRawAxis(5);
+    m_robotDrive.arcadeDrive(speed, rotation);
   }
-  
+
   @Override
   public void autonomousInit() {
     // Get the selected autonomous routine
