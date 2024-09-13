@@ -280,7 +280,8 @@ public class Robot extends TimedRobot {
     }
   }
 
-  // Update field visualization with current robot pose
+  // Update field visualization with current robot pose that's very real 
+  // haha we might atually try to get vision working with one of 2036's old limelights
   private void updateField2d() {
     m_field.setRobotPose(m_field.getRobotPose());
   }
