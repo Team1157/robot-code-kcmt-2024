@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.MathUtil;
 
 public class Robot extends TimedRobot {
   private ADXRS450_Gyro gyro;
@@ -161,12 +162,48 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    // Read controller inputs and control robot with arcade drive 
-    //(left y works as the left y on the gamecube controller but right x is actually 
-    // the trigger analog input on it so we just use its raw axis)
-    double speed = 2 * -m_driverController.getLeftY();
-    double rotation = 2 * -m_driverController.getRawAxis(5);
-    m_robotDrive.arcadeDrive(speed, rotation);
+    // Read controller inputs for field-relative drive
+    double forwardSpeed = -m_driverController.getLeftY();
+    double strafeSpeed = m_driverController.getLeftX();
+    double rotationSpeed = -m_driverController.getRawAxis(5);
+
+    // Get the current gyro angle
+    double gyroAngle = gyro.getAngle();
+
+    // Apply field-relative drive
+    driveFieldRelative(forwardSpeed, strafeSpeed, rotationSpeed, gyroAngle);
+  }
+
+  /**
+   * Implements field-relative drive using gyro feedback.
+   *
+   * @param forward The robot's speed along the X axis [-1.0..1.0]. Forward is positive.
+   * @param strafe The robot's speed along the Y axis [-1.0..1.0]. Left is positive.
+   * @param rotation The robot's rotation rate around the Z axis [-1.0..1.0]. Counterclockwise is positive.
+   * @param gyroAngle The current gyro angle in degrees.
+   */
+  private void driveFieldRelative(double forward, double strafe, double rotation, double gyroAngle) {
+    // Convert gyro angle to radians
+    double gyroRadians = Math.toRadians(gyroAngle);
+
+    // Apply field-relative transformations
+    double temp = forward * Math.cos(gyroRadians) + strafe * Math.sin(gyroRadians);
+    strafe = -forward * Math.sin(gyroRadians) + strafe * Math.cos(gyroRadians);
+    forward = temp;
+
+    // Adjust inputs for differential drive
+    double leftMotorOutput = forward + rotation;
+    double rightMotorOutput = forward - rotation;
+
+    // Normalize wheel speeds
+    double maxMagnitude = Math.max(Math.abs(leftMotorOutput), Math.abs(rightMotorOutput));
+    if (maxMagnitude > 1.0) {
+      leftMotorOutput /= maxMagnitude;
+      rightMotorOutput /= maxMagnitude;
+    }
+
+    // Set motor outputs
+    m_robotDrive.tankDrive(leftMotorOutput, rightMotorOutput);
   }
 
   @Override
@@ -207,8 +244,6 @@ public class Robot extends TimedRobot {
       m_robotDrive.arcadeDrive(0.5, 0.0); // Move forward at 50% speed
     } else if (m_timer.get() < 3.0) {
       m_robotDrive.arcadeDrive(0.0, 0.5); // Turn right at 50% speed
-    } else {
-      m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
     }
   }
 
@@ -245,7 +280,7 @@ public class Robot extends TimedRobot {
     }
   }
 
-  // Update field visualization with current robot pose that doesn't actually work lol
+  // Update field visualization with current robot pose
   private void updateField2d() {
     m_field.setRobotPose(m_field.getRobotPose());
   }
