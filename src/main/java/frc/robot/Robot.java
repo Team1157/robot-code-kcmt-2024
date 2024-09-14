@@ -1,5 +1,11 @@
 package frc.robot;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -15,11 +21,13 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.subsystems.uwu;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 public class Robot extends TimedRobot {
   private ADXRS450_Gyro gyro;
+  private DifferentialDrivePoseEstimator m_poseEstimator;
 
   // Motor ports and PDP setup
   private static final int LEFT_MOTOR_PORT = 0;
@@ -42,24 +50,24 @@ public class Robot extends TimedRobot {
   private NetworkTable m_dashboardTable;
   private NetworkTableEntry m_accelXEntry, m_accelYEntry, m_accelZEntry;
   private NetworkTableEntry m_leftMotorOutputEntry, m_rightMotorOutputEntry;
-  private NetworkTableEntry m_leftFollowerOutputEntry, m_rightFollowerOutputEntry;
-  private NetworkTableEntry m_timerEntry, m_fieldPositionEntry;
-
-  // Autonomous mode options
-  private static final String kDefaultAuto = "auto0";
-  private static final String kCustomAuto1 = "auto1";
-  private static final String kCustomAuto2 = "auto2";
-  private static final String kCustomAuto3 = "auto3";
-
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  private NetworkTableEntry m_leftFollowerOutputEntry, m_rightFollowerOutputEntry, m_camera;
+  private NetworkTableEntry m_timerEntry, m_fieldPositionEntry, m_drivemode, m_slowmode;
+  private NetworkTableEntry m_visionTargetEntry; // Vision target entry
+  private uwu m_uwu;
   private final Timer m_timer = new Timer();
 
   // Field2d visualization
   private final Field2d m_field = new Field2d();
 
+  // Initialize odometry
+  private final double kTrackWidthMeters = 0.69; // Example track width (meters)
+  private final DifferentialDriveKinematics m_kinematics = new DifferentialDriveKinematics(kTrackWidthMeters);
+  private DifferentialDriveOdometry m_odometry;
+  private Rotation2d Rotation2d;
+  
   // Constructor to register motor objects with the SendableRegistry
   public Robot() {
+    m_uwu = new uwu();
     SendableRegistry.addChild(m_robotDrive, m_leftMotor);
     SendableRegistry.addChild(m_robotDrive, m_rightMotor);
   }
@@ -70,24 +78,24 @@ public class Robot extends TimedRobot {
     gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
     gyro.calibrate();
     
-    // Configure autonomous choices and motors
-    configureAutoChooser();
-    configureMotors();
-    
     // Initialize NetworkTables for Elastic dashboard communication
     initializeNetworkTables();
     
     // Add field visualization to Elastic
     SmartDashboard.putData("Field", m_field);
-  }
 
-  // Configure autonomous mode chooser
-  private void configureAutoChooser() {
-    m_chooser.setDefaultOption("Forward for 4 seconds", kDefaultAuto);
-    m_chooser.addOption("Forward, turn right, stop", kCustomAuto1);
-    m_chooser.addOption("Forward, turn left, stop", kCustomAuto2);
-    m_chooser.addOption("Forward, turn right, move forward again, stop", kCustomAuto3);
-    SmartDashboard.putData("Auto choices", m_chooser);
+    // Initialize odometry
+    
+    m_odometry = new DifferentialDriveOdometry(Rotation2d, gyro.getAngle(), kTrackWidthMeters);
+    m_poseEstimator = new DifferentialDrivePoseEstimator(
+      m_kinematics,
+      gyro.getRotation2d(),
+      0.0, // initial left encoder distance
+      0.0, // initial right encoder distance
+      new Pose2d(),
+      VecBuilder.fill(0.05, 0.05, 0.00872664626),
+      VecBuilder.fill(0.5, 0.5, 0.523598776)
+    );
   }
 
   // Configure motor inversion and followers
@@ -111,6 +119,9 @@ public class Robot extends TimedRobot {
     m_rightFollowerOutputEntry = m_dashboardTable.getEntry("RightFollowerOutput");
     m_timerEntry = m_dashboardTable.getEntry("MatchTime");
     m_fieldPositionEntry = m_dashboardTable.getEntry("FieldPosition");
+    m_drivemode = m_dashboardTable.getEntry("DriveMode");
+    m_slowmode = m_dashboardTable.getEntry("SlowMode");
+    m_visionTargetEntry = m_dashboardTable.getEntry("VisionTarget"); // Vision target entry
   }
 
   @Override
@@ -121,7 +132,7 @@ public class Robot extends TimedRobot {
     
     // Update NetworkTables with sensor data
     updateNetworkTables();
-
+  
     // Display gyro values on SmartDashboard
     SmartDashboard.putNumber("Gyro Angle", angle);
     SmartDashboard.putNumber("Gyro Rate", rate);
@@ -157,6 +168,10 @@ public class Robot extends TimedRobot {
       double current = m_pdp.getCurrent(channel);
       SmartDashboard.putNumber("Current Channel " + channel, current);
     }
+
+    // Update vision data
+    double visionTargetX = m_visionTargetEntry.getDouble(0.0);
+    SmartDashboard.putNumber("Vision Target X", visionTargetX);
   }
 
   @Override
@@ -169,8 +184,20 @@ public class Robot extends TimedRobot {
     // Get the current gyro angle
     double gyroAngle = gyro.getAngle();
 
+    // Calculate pose estimate
+    Pose2d currentPose = m_odometry.update(
+      gyro.getRotation2d(),
+      getLeftEncoderDistance(),
+      getRightEncoderDistance()
+    );
+
+    // Update field visualization with robot pose
+    m_field.setRobotPose(currentPose);
+
     // Apply field-relative drive
     driveFieldRelative(forwardSpeed, strafeSpeed, rotationSpeed, gyroAngle);
+
+    // Reset gyro and calibrate gyro based on button inputs
     if (m_driverController.getRawButton(8)) {
       gyro.reset();
     }
@@ -181,7 +208,7 @@ public class Robot extends TimedRobot {
 
   /**
    * Implements field-relative drive using gyro feedback.
-   *
+   *  
    * @param forward The robot's speed along the X axis [-1.0..1.0]. Forward is positive.
    * @param strafe The robot's speed along the Y axis [-1.0..1.0]. Left is positive.
    * @param rotation The robot's rotation rate around the Z axis [-1.0..1.0]. Counterclockwise is positive.
@@ -189,102 +216,51 @@ public class Robot extends TimedRobot {
    */
   private void driveFieldRelative(double forward, double strafe, double rotation, double gyroAngle) {
     // Convert gyro angle to radians
-    double gyroRadians = Math.toRadians(gyroAngle);
+    if (false == (m_driverController.getRawButton(5)))  {
+      double gyroRadians = Math.toRadians(gyroAngle);
+      m_drivemode.setString("Field centric :)");
+      
+      // Apply field-relative transformations
+      double temp = forward * Math.cos(gyroRadians) + strafe * Math.sin(gyroRadians);
+      strafe = -forward * Math.sin(gyroRadians) + strafe * Math.cos(gyroRadians);
+      forward = temp;
 
-    // Apply field-relative transformations
-    double temp = forward * Math.cos(gyroRadians) + strafe * Math.sin(gyroRadians);
-    strafe = -forward * Math.sin(gyroRadians) + strafe * Math.cos(gyroRadians);
-    forward = temp;
+      // Adjust inputs for differential drive
+      double leftMotorOutput = forward + rotation;
+      double rightMotorOutput = forward - rotation;
 
-    // Adjust inputs for differential drive
-    double leftMotorOutput = forward + rotation;
-    double rightMotorOutput = forward - rotation;
+      // Make bot fasttttt
+      leftMotorOutput *= 2;
+      rightMotorOutput *= 1.8;
 
-    // make bot fasttttt
-    leftMotorOutput *= 2;
-    rightMotorOutput *= 1.8;
- 
-    // Set motor outputs
-    m_robotDrive.tankDrive(leftMotorOutput, rightMotorOutput);
-  }
-
-  @Override
-  public void autonomousInit() {
-    // Get the selected autonomous routine
-    m_autoSelected = m_chooser.getSelected();
-    System.out.println("Auto selected: " + m_autoSelected);
-    m_timer.reset();
-    m_timer.start();
-  }
-
-  @Override
-  public void autonomousPeriodic() {
-    // Run the selected autonomous routine
-    switch (m_autoSelected) {
-      case kCustomAuto1:
-        runAutoRoutine1();
-        break;
-      case kCustomAuto2:
-        runAutoRoutine2();
-        break;
-      case kCustomAuto3:
-        runAutoRoutine3();
-        break;
-      case kDefaultAuto:
-      default:
-        runDefaultAuto();
-        break;
-    }
-
-    // Update field visualization
-    updateField2d();
-  }
-
-  // Auto routine 1: Forward, turn right, stop
-  private void runAutoRoutine1() {
-    if (m_timer.get() < 2.0) {
-      m_robotDrive.arcadeDrive(0.5, 0.0); // Move forward at 50% speed
-    } else if (m_timer.get() < 3.0) {
-      m_robotDrive.arcadeDrive(0.0, 0.5); // Turn right at 50% speed
-    }
-  }
-
-  // Auto routine 2: Forward, turn left, stop
-  private void runAutoRoutine2() {
-    if (m_timer.get() < 3.0) {
-      m_robotDrive.arcadeDrive(0.6, 0.0); // Move forward at 60% speed
-    } else if (m_timer.get() < 4.5) {
-      m_robotDrive.arcadeDrive(0.0, -0.6); // Turn left at 60% speed
+      // Slow mode
+      if (m_driverController.getRawButton(6)) {
+        m_slowmode.setString("True");
+        leftMotorOutput *= 0.5;
+        rightMotorOutput *= 0.5;
+      } else {
+        m_slowmode.setString("False");
+      }
+      // Set motor outputs
+      m_robotDrive.tankDrive(leftMotorOutput, rightMotorOutput);
     } else {
-      m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
+      // Read controller inputs and control robot with arcade drive 
+      m_drivemode.setString("robo centric :)");
+
+      double speed = 2 * -m_driverController.getLeftY();
+      rotation = 2 * -m_driverController.getRawAxis(5);
+      m_robotDrive.arcadeDrive(speed, rotation);
     }
   }
 
-  // Auto routine 3: Forward, turn right, move forward again, stop
-  private void runAutoRoutine3() {
-    if (m_timer.get() < 1.5) {
-      m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward at 70% speed
-    } else if (m_timer.get() < 3.5) {
-      m_robotDrive.arcadeDrive(0.0, 0.7); // Turn right at 70% speed
-    } else if (m_timer.get() < 5.0) {
-      m_robotDrive.arcadeDrive(0.7, 0.0); // Move forward again at 70% speed
-    } else {
-      m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
-    }
+  // Example methods to get encoder distances (need to be implemented)
+  private double getLeftEncoderDistance() {
+    // Implement encoder distance retrieval
+    return 0.0;
   }
 
-  // Default auto routine: Move forward, stop
-  private void runDefaultAuto() {
-    if (m_timer.get() < 4.0) {
-      m_robotDrive.arcadeDrive(1.0, 0.0); // Move forward at 100% speed
-    } else {
-      m_robotDrive.arcadeDrive(0.0, 0.0); // Stop
-    }
-  }
-
-  // Update field visualization with current robot pose that's very real 
-  // haha we might atually try to get vision working with one of 2036's old limelights
-  private void updateField2d() {
-    m_field.setRobotPose(m_field.getRobotPose());
+  private double getRightEncoderDistance() {
+    // Implement encoder distance retrieval
+    return 0.0;
   }
 }
