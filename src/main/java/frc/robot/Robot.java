@@ -171,6 +171,12 @@ public class Robot extends TimedRobot {
 
     // Apply field-relative drive
     driveFieldRelative(forwardSpeed, strafeSpeed, rotationSpeed, gyroAngle);
+    if (m_driverController.getRawButton(8)) {
+      gyro.reset();
+    }
+    if (m_driverController.getRawButton(2)) {
+      gyro.calibrate();
+    }
   }
 
   /**
@@ -194,13 +200,10 @@ public class Robot extends TimedRobot {
     double leftMotorOutput = forward + rotation;
     double rightMotorOutput = forward - rotation;
 
-    // Normalize wheel speeds
-    double maxMagnitude = Math.max(Math.abs(leftMotorOutput), Math.abs(rightMotorOutput));
-    if (maxMagnitude > 1.0) {
-      leftMotorOutput /= maxMagnitude;
-      rightMotorOutput /= maxMagnitude;
-    }
-
+    // make bot fasttttt
+    leftMotorOutput *= 2;
+    rightMotorOutput *= 1.8;
+ 
     // Set motor outputs
     m_robotDrive.tankDrive(leftMotorOutput, rightMotorOutput);
   }
