@@ -22,8 +22,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.subsystems.uwu;
-import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.subsystems.UwU;
 
 public class Robot extends TimedRobot {
   private ADXRS450_Gyro gyro;
@@ -53,7 +52,7 @@ public class Robot extends TimedRobot {
   private NetworkTableEntry m_leftFollowerOutputEntry, m_rightFollowerOutputEntry, m_camera;
   private NetworkTableEntry m_timerEntry, m_fieldPositionEntry, m_drivemode, m_slowmode;
   private NetworkTableEntry m_visionTargetEntry; // Vision target entry
-  private uwu m_uwu;
+  private UwU m_uwu;
   private final Timer m_timer = new Timer();
 
   // Field2d visualization
@@ -67,7 +66,7 @@ public class Robot extends TimedRobot {
   
   // Constructor to register motor objects with the SendableRegistry
   public Robot() {
-    m_uwu = new uwu();
+    m_uwu = new UwU();
     SendableRegistry.addChild(m_robotDrive, m_leftMotor);
     SendableRegistry.addChild(m_robotDrive, m_rightMotor);
   }
@@ -231,7 +230,7 @@ public class Robot extends TimedRobot {
 
       // Make bot fasttttt
       leftMotorOutput *= 2;
-      rightMotorOutput *= 1.8;
+      rightMotorOutput *= 1.71;
 
       // Slow mode
       if (m_driverController.getRawButton(6)) {
