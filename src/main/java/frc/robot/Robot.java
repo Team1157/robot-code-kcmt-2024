@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-//import frc.robot.subsystems.UwU;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 public class Robot extends TimedRobot {
   private ADXRS450_Gyro gyro;
@@ -52,7 +52,6 @@ public class Robot extends TimedRobot {
   private NetworkTableEntry m_leftFollowerOutputEntry, m_rightFollowerOutputEntry, m_camera;
   private NetworkTableEntry m_timerEntry, m_fieldPositionEntry, m_drivemode, m_slowmode;
   private NetworkTableEntry m_visionTargetEntry; // Vision target entry
-  //private UwU m_uwu;
   private final Timer m_timer = new Timer();
 
   // Field2d visualization
@@ -62,11 +61,10 @@ public class Robot extends TimedRobot {
   private final double kTrackWidthMeters = 0.69; // Example track width (meters)
   private final DifferentialDriveKinematics m_kinematics = new DifferentialDriveKinematics(kTrackWidthMeters);
   private DifferentialDriveOdometry m_odometry;
-  private Rotation2d Rotation2d;
+  //private Rotation2d Rotation2d;
   
   // Constructor to register motor objects with the SendableRegistry
   public Robot() {
-   // m_uwu = new UwU();
     SendableRegistry.addChild(m_robotDrive, m_leftMotor);
     SendableRegistry.addChild(m_robotDrive, m_rightMotor);
   }
@@ -85,16 +83,7 @@ public class Robot extends TimedRobot {
 
     // Initialize odometry
     
-    m_odometry = new DifferentialDriveOdometry(Rotation2d, gyro.getAngle(), kTrackWidthMeters);
-    m_poseEstimator = new DifferentialDrivePoseEstimator(
-      m_kinematics,
-      gyro.getRotation2d(),
-      0.0, // initial left encoder distance
-      0.0, // initial right encoder distance
-      new Pose2d(),
-      VecBuilder.fill(0.05, 0.05, 0.00872664626),
-      VecBuilder.fill(0.5, 0.5, 0.523598776)
-    );
+    //m_odometry = new DifferentialDriveOdometry(Rotation2d, gyro.getAngle(), kTrackWidthMeters);
   }
 
   // Configure motor inversion and followers
@@ -107,6 +96,7 @@ public class Robot extends TimedRobot {
 
   // Initialize NetworkTables for communication with elastic dashboard
   private void initializeNetworkTables() {
+    configureMotors();
     m_ntInstance = NetworkTableInstance.getDefault();
     m_dashboardTable = m_ntInstance.getTable("SmartDashboard");
     m_accelXEntry = m_dashboardTable.getEntry("AccelX");
@@ -139,9 +129,9 @@ public class Robot extends TimedRobot {
 
   // Send sensor and motor data to NetworkTables
   private void updateNetworkTables() {
-    m_accelXEntry.setDouble(m_accelerometer.getX());
-    m_accelYEntry.setDouble(m_accelerometer.getY());
-    m_accelZEntry.setDouble(m_accelerometer.getZ());
+    //m_accelXEntry.setDouble(m_accelerometer.getX());
+    //m_accelYEntry.setDouble(m_accelerometer.getY());
+    //m_accelZEntry.setDouble(m_accelerometer.getZ());
 
     // Send power distribution data
     double voltage = m_pdp.getVoltage();
@@ -184,14 +174,12 @@ public class Robot extends TimedRobot {
     double gyroAngle = gyro.getAngle();
 
     // Calculate pose estimate
-    Pose2d currentPose = m_odometry.update(
-      gyro.getRotation2d(),
-      getLeftEncoderDistance(),
-      getRightEncoderDistance()
-    );
+    //Pose2d currentPose = m_odometry.update(
+    //  Rotation2d, gyro.getAngle(), gyroAngle
+    //);
 
     // Update field visualization with robot pose
-    m_field.setRobotPose(currentPose);
+    //m_field.setRobotPose(currentPose);
 
     // Apply field-relative drive
     driveFieldRelative(forwardSpeed, strafeSpeed, rotationSpeed, gyroAngle);
@@ -230,7 +218,7 @@ public class Robot extends TimedRobot {
 
       // Make bot fasttttt
       leftMotorOutput *= 2;
-      rightMotorOutput *= 1.71;
+      rightMotorOutput *= 1.8;
 
       // Slow mode
       if (m_driverController.getRawButton(6)) {
@@ -247,19 +235,8 @@ public class Robot extends TimedRobot {
       m_drivemode.setString("robo centric :)");
 
       double speed = 2 * -m_driverController.getLeftY();
-      rotation = 2 * -m_driverController.getRawAxis(5);
+      rotation = 2 * m_driverController.getRawAxis(5);
       m_robotDrive.arcadeDrive(speed, rotation);
     }
-  }
-
-  // Example methods to get encoder distances (need to be implemented)
-  private double getLeftEncoderDistance() {
-    // Implement encoder distance retrieval
-    return 0.0;
-  }
-
-  private double getRightEncoderDistance() {
-    // Implement encoder distance retrieval
-    return 0.0;
   }
 }
