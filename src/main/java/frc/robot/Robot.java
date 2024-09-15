@@ -222,11 +222,11 @@ public class Robot extends TimedRobot {
 
       // Slow mode
       if (m_driverController.getRawButton(6)) {
-        m_slowmode.setString("True");
+        m_slowmode.setBoolean(true);
         leftMotorOutput *= 0.5;
         rightMotorOutput *= 0.5;
       } else {
-        m_slowmode.setString("False");
+        m_slowmode.setBoolean(false);
       }
       // Set motor outputs
       m_robotDrive.tankDrive(leftMotorOutput, rightMotorOutput);
