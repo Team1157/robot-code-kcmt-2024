@@ -33,4 +33,11 @@
 - [X] ~~Design simple shooter and chute intake mechanism~~
 - [ ] Fabricate shooter parts
 - [ ] Assemble shooter
-- [X] ~~Autos (just drives forwards for 4 seconds or does nothing)~~
+- [X] ~~Paint robot~~
+- [ ] Implement field localisation using vision
+- [ ] Use photonlib in our code for ^
+- [ ] Mount vision raspi
+- [X] ~~Setup photonvision on a pi, install and wire camera, apriltag detection~~
+- [X] Setup pathplanner for autos, requires field localisation
+
+
