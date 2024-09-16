@@ -17,6 +17,7 @@
 - [X] ~~talon srx wired to pwm 2, right motor 1~~
 - [X] ~~talon srx wired to pwm 3, right motor 2~~
 - [x] ~~Make quick and dirty bumpers with pool noodles~~
+- [ ] Implement the segments of 2022 reversable bumpers to improve ^
 - [x] ~~Mount roboRio~~  
 - [X] ~~Wire roboRio to motor controllers, pdp can, and power~~  
 - [X] ~~Borrow/buy vh-109 [radio](https://wcproducts.com/products/frc-radio) for kcmt, Debbie English said one can be provided)~~
